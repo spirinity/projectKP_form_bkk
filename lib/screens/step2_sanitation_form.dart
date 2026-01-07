@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
+import '../models/inspection_model.dart';
 import '../providers/inspection_provider.dart';
 import 'step3_health_form.dart';
 
@@ -14,10 +15,26 @@ class Step2SanitationForm extends StatefulWidget {
 
 class _Step2SanitationFormState extends State<Step2SanitationForm> {
   final _formKey = GlobalKey<FormBuilderState>();
+  final _noteController = TextEditingController();
+  final _otherAreaController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final provider = Provider.of<InspectionProvider>(context, listen: false);
+    _noteController.text = provider.data.sanitationNote ?? '';
+    _otherAreaController.text = provider.data.otherAreaDescription ?? '';
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    _otherAreaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<InspectionProvider>(context, listen: false);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -49,89 +66,103 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
                 ],
               ),
             ),
-            
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Checklist Card
-                    _buildFormCard(
-                      title: 'Checklist Kebersihan',
-                      icon: Icons.checklist,
-                      iconColor: Colors.teal,
-                      children: [
-                        _buildSanitationItem(
-                          'kitchenClean',
-                          'Dapur (Galley)',
-                          'Tidak ada sisa makanan busuk, peralatan bersih',
-                          Icons.kitchen,
-                          provider.data.kitchenClean,
-                        ),
-                        _buildSanitationItem(
-                          'pantryClean',
-                          'Pantry / Penyimpanan Makanan',
-                          'Area penyimpanan tertata dan bersih',
-                          Icons.inventory_2,
-                          provider.data.pantryClean,
-                        ),
-                        _buildSanitationItem(
-                          'foodStorageClean',
-                          'Gudang Makanan',
-                          'Suhu sesuai, tidak ada tanda hama',
-                          Icons.warehouse,
-                          provider.data.foodStorageClean,
-                        ),
-                      ],
+                    // Info Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.blue[200]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.blue[700],
+                            size: 20,
+                          ),
+                          const Gap(8),
+                          Expanded(
+                            child: Text(
+                              'Beri tanda (✓) pada kolom sesuai dengan kondisi',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue[700],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    
+
                     const Gap(16),
-                    
-                    _buildFormCard(
-                      title: 'Pengelolaan & Vektor',
-                      icon: Icons.pest_control,
-                      iconColor: Colors.brown,
-                      children: [
-                        _buildSanitationItem(
-                          'wasteManagementGood',
-                          'Pengelolaan Limbah',
-                          'Sampah dipisah dan tertutup rapat',
-                          Icons.delete,
-                          provider.data.wasteManagementGood,
-                        ),
-                        _buildSanitationItem(
-                          'vectorControlGood',
-                          'Bebas Vektor (Tikus/Kecoa)',
-                          'Tidak ditemukan jejak atau keberadaan vektor',
-                          Icons.bug_report,
-                          provider.data.vectorControlGood,
-                        ),
-                      ],
-                    ),
-                    
+
+                    // Sanitation Table Card
+                    _buildSanitationTableCard(),
+
                     const Gap(16),
-                    
+
+                    // Other Area Description
                     _buildFormCard(
-                      title: 'Catatan Tambahan',
-                      icon: Icons.note_add,
-                      iconColor: Colors.indigo,
+                      title: 'Deskripsi Area Lainnya',
+                      icon: Icons.edit_note,
+                      iconColor: Colors.orange,
                       children: [
-                        FormBuilderTextField(
-                          name: 'sanitationNote',
-                          initialValue: provider.data.sanitationNote,
-                          maxLines: 4,
+                        TextField(
+                          controller: _otherAreaController,
+                          maxLines: 2,
                           decoration: InputDecoration(
-                            hintText: 'Misal: Ditemukan kebocoran pipa di dapur, perlu perbaikan...',
-                            hintStyle: TextStyle(fontSize: 13, color: Colors.grey[400]),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            hintText:
+                                'Jelaskan area lainnya yang diperiksa (jika ada)...',
+                            hintStyle: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[400],
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             filled: true,
                             fillColor: Colors.grey[50],
                           ),
                         ),
                       ],
                     ),
-                    
+
+                    const Gap(16),
+
+                    // Notes Card
+                    _buildFormCard(
+                      title: 'Catatan Tambahan',
+                      icon: Icons.note_add,
+                      iconColor: Colors.indigo,
+                      children: [
+                        TextField(
+                          controller: _noteController,
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            hintText: 'Catatan pemeriksaan sanitasi...',
+                            hintStyle: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[400],
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                        ),
+                      ],
+                    ),
+
                     const Gap(100),
                   ],
                 ),
@@ -146,7 +177,10 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
         child: FloatingActionButton.extended(
           onPressed: _submitForm,
           icon: const Icon(Icons.arrow_forward),
-          label: const Text('Lanjut ke Kesehatan', style: TextStyle(fontWeight: FontWeight.w600)),
+          label: const Text(
+            'Lanjut ke Kesehatan',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           backgroundColor: theme.primaryColor,
           foregroundColor: Colors.white,
         ),
@@ -155,22 +189,408 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
     );
   }
 
+  Widget _buildSanitationTableCard() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.teal.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.checklist,
+                    color: Colors.teal,
+                    size: 20,
+                  ),
+                ),
+                const Gap(12),
+                const Expanded(
+                  child: Text(
+                    'Pemeriksaan Sanitasi Kapal',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Legend - Above Table
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.amber[50],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(0),
+                topRight: Radius.circular(0),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Keterangan:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const Gap(4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '• MS = Memenuhi Syarat (Qualify)',
+                        style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        '• TT = Tampak Tanda (Visible Signs)',
+                        style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '• TMS = Tidak Memenuhi Syarat (Unqualify)',
+                        style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        '• TTT = Tidak Tampak Tanda (No Evidence)',
+                        style: TextStyle(fontSize: 9, color: Colors.grey[600]),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Table Header with merged cells using Stack for true vertical centering
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // No column - true merged cell using Stack
+                  SizedBox(
+                    width: 35,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        border: Border(
+                          right: BorderSide(color: Colors.grey[400]!),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'No',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Lokasi column - true merged cell
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        border: Border(
+                          right: BorderSide(color: Colors.grey[400]!),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Lokasi Yang Diperiksa\n(Inspected Areas)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 9,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Kondisi Sanitasi + Vektor columns with sub-headers
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      children: [
+                        // Parent headers row
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    border: Border(
+                                      right: BorderSide(
+                                        color: Colors.grey[400]!,
+                                      ),
+                                      bottom: BorderSide(
+                                        color: Colors.grey[400]!,
+                                      ),
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Kondisi Sanitasi',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Colors.grey[400]!,
+                                      ),
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Vektor',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Sub-headers row (MS, TMS, TT, TTT)
+                        SizedBox(
+                          height: 28,
+                          child: Row(
+                            children: [
+                              _buildSubHeader('MS'),
+                              _buildSubHeader('TMS'),
+                              _buildSubHeader('TT'),
+                              _buildSubHeader('TTT', isLast: true),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Table Rows
+          Consumer<InspectionProvider>(
+            builder: (context, provider, _) {
+              return Column(
+                children: SanitationAreaKeys.allKeys.asMap().entries.map((
+                  entry,
+                ) {
+                  final index = entry.key;
+                  final areaKey = entry.value;
+                  final areaData = provider.data.sanitationAreas[areaKey]!;
+                  final isEven = index % 2 == 0;
+
+                  return _buildTableRow(
+                    index: index + 1,
+                    areaKey: areaKey,
+                    label: SanitationAreaKeys.getLabel(areaKey),
+                    areaData: areaData,
+                    isEven: isEven,
+                    provider: provider,
+                  );
+                }).toList(),
+              );
+            },
+          ),
+
+          const Gap(8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubHeader(String text, {bool isLast = false}) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          border: isLast
+              ? null
+              : Border(right: BorderSide(color: Colors.grey[400]!)),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 9),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableRow({
+    required int index,
+    required String areaKey,
+    required String label,
+    required SanitationAreaData areaData,
+    required bool isEven,
+    required InspectionProvider provider,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: isEven ? Colors.grey[50] : Colors.white),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 35,
+            child: Text(
+              '$index',
+              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 11),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          _buildCheckboxCell(
+            value: areaData.qualify,
+            onChanged: (val) {
+              provider.updateSanitationArea(
+                areaKey,
+                qualify: val,
+                unqualify: val == true ? false : null,
+              );
+            },
+          ),
+          _buildCheckboxCell(
+            value: areaData.unqualify,
+            onChanged: (val) {
+              provider.updateSanitationArea(
+                areaKey,
+                unqualify: val,
+                qualify: val == true ? false : null,
+              );
+            },
+          ),
+          _buildCheckboxCell(
+            value: areaData.visibleSigns,
+            onChanged: (val) {
+              provider.updateSanitationArea(
+                areaKey,
+                visibleSigns: val,
+                noSigns: val == true ? false : null,
+              );
+            },
+          ),
+          _buildCheckboxCell(
+            value: areaData.noSigns,
+            onChanged: (val) {
+              provider.updateSanitationArea(
+                areaKey,
+                noSigns: val,
+                visibleSigns: val == true ? false : null,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheckboxCell({
+    required bool value,
+    required ValueChanged<bool?> onChanged,
+  }) {
+    return Expanded(
+      flex: 1,
+      child: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: value,
+            onChanged: onChanged,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            activeColor: Colors.teal,
+          ),
+        ),
+      ),
+    );
+  }
+
   void _submitForm() {
-    if (_formKey.currentState?.saveAndValidate() ?? false) {
-      final values = _formKey.currentState!.value;
-      final provider = Provider.of<InspectionProvider>(context, listen: false);
-      
-      provider.updateSanitationData(
-        kitchenClean: values['kitchenClean'] ?? false,
-        pantryClean: values['pantryClean'] ?? false,
-        foodStorageClean: values['foodStorageClean'] ?? false,
-        wasteManagementGood: values['wasteManagementGood'] ?? false,
-        vectorControlGood: values['vectorControlGood'] ?? false,
-        note: values['sanitationNote'],
-      );
-      
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Step3HealthForm()));
-    }
+    final provider = Provider.of<InspectionProvider>(context, listen: false);
+
+    // Save notes
+    provider.updateSanitationNote(_noteController.text);
+    provider.updateOtherAreaDescription(_otherAreaController.text);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const Step3HealthForm()),
+    );
   }
 
   Widget _buildStepIndicator(int step, String label, bool isPast) {
@@ -185,16 +605,20 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: isPast 
-                ? Icon(Icons.check, color: Theme.of(context).primaryColor, size: 16)
-                : Text(
-                    '$step',
-                    style: TextStyle(
+              child: isPast
+                  ? Icon(
+                      Icons.check,
                       color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      size: 16,
+                    )
+                  : Text(
+                      '$step',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
             ),
           ),
           const Gap(4),
@@ -219,7 +643,12 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
     );
   }
 
-  Widget _buildFormCard({required String title, required IconData icon, Color? iconColor, required List<Widget> children}) {
+  Widget _buildFormCard({
+    required String title,
+    required IconData icon,
+    Color? iconColor,
+    required List<Widget> children,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -242,51 +671,28 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                  color: (iconColor ?? Theme.of(context).primaryColor)
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor, size: 20),
+                child: Icon(
+                  icon,
+                  color: iconColor ?? Theme.of(context).primaryColor,
+                  size: 20,
+                ),
               ),
               const Gap(12),
-              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const Gap(16),
           ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSanitationItem(String name, String title, String subtitle, IconData icon, bool initialValue) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.grey[600], size: 24),
-          const Gap(12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-              ],
-            ),
-          ),
-          FormBuilderSwitch(
-            name: name,
-            initialValue: initialValue,
-            decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.zero),
-            title: const SizedBox.shrink(),
-            activeColor: Colors.teal,
-          ),
         ],
       ),
     );

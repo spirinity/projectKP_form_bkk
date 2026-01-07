@@ -39,7 +39,8 @@ class InspectionProvider with ChangeNotifier {
     if (dockLocation != null) _data.dockLocation = dockLocation;
     if (crewCount != null) _data.crewCount = crewCount;
     if (passengerCount != null) _data.passengerCount = passengerCount;
-    if (unregisteredPassengers != null) _data.unregisteredPassengers = unregisteredPassengers;
+    if (unregisteredPassengers != null)
+      _data.unregisteredPassengers = unregisteredPassengers;
     if (agency != null) _data.agency = agency;
     notifyListeners();
   }
@@ -47,7 +48,7 @@ class InspectionProvider with ChangeNotifier {
   // Generic update for "Data Khusus" (Violations & Documents)
   // To avoid a massive single function, we can group them or use direct assignment if logic is simple.
   // For provider pattern, explicit setters are safer.
-  
+
   void updateQuarantineViolations({String? signal, String? activity}) {
     if (signal != null) _data.quarantineSignal = signal;
     if (activity != null) _data.shipActivity = activity;
@@ -59,8 +60,14 @@ class InspectionProvider with ChangeNotifier {
     if (note != null) _data.mdhNote = note;
     notifyListeners();
   }
-  
-  void updateDocumentSSCEC({String? place, DateTime? date, DateTime? expiry, String? status, String? note}) {
+
+  void updateDocumentSSCEC({
+    String? place,
+    DateTime? date,
+    DateTime? expiry,
+    String? status,
+    String? note,
+  }) {
     if (place != null) _data.sscecPlace = place;
     if (date != null) _data.sscecDate = date;
     if (expiry != null) _data.sscecExpiry = expiry;
@@ -68,7 +75,7 @@ class InspectionProvider with ChangeNotifier {
     if (note != null) _data.sscecNote = note;
     notifyListeners();
   }
-  
+
   void updateDocumentCrewList({String? status, String? note}) {
     _data.crewListStatus = status ?? _data.crewListStatus;
     _data.crewListNote = note ?? _data.crewListNote;
@@ -81,7 +88,13 @@ class InspectionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateDocumentP3K({String? place, DateTime? date, DateTime? expiry, String? status, String? note}) {
+  void updateDocumentP3K({
+    String? place,
+    DateTime? date,
+    DateTime? expiry,
+    String? status,
+    String? note,
+  }) {
     if (place != null) _data.p3kPlace = place;
     if (date != null) _data.p3kDate = date;
     if (expiry != null) _data.p3kExpiry = expiry;
@@ -90,7 +103,12 @@ class InspectionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateDocumentHealthBook({String? place, DateTime? date, String? status, String? note}) {
+  void updateDocumentHealthBook({
+    String? place,
+    DateTime? date,
+    String? status,
+    String? note,
+  }) {
     if (place != null) _data.healthBookPlace = place;
     if (date != null) _data.healthBookDate = date;
     if (status != null) _data.healthBookStatus = status;
@@ -99,9 +117,12 @@ class InspectionProvider with ChangeNotifier {
   }
 
   void updateOtherDocuments({
-    String? voyageStatus, String? voyageNote,
-    String? shipPartStatus, String? shipPartNote,
-    String? manifestStatus, String? manifestNote
+    String? voyageStatus,
+    String? voyageNote,
+    String? shipPartStatus,
+    String? shipPartNote,
+    String? manifestStatus,
+    String? manifestNote,
   }) {
     if (voyageStatus != null) _data.voyageMemoStatus = voyageStatus;
     if (voyageNote != null) _data.voyageMemoNote = voyageNote;
@@ -112,7 +133,12 @@ class InspectionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateRisks({bool? sanitation, String? sDetail, bool? health, String? hDetail}) {
+  void updateRisks({
+    bool? sanitation,
+    String? sDetail,
+    bool? health,
+    String? hDetail,
+  }) {
     if (sanitation != null) _data.sanitationRisk = sanitation;
     if (sDetail != null) _data.sanitationRiskDetail = sDetail;
     if (health != null) _data.healthRisk = health;
@@ -126,8 +152,11 @@ class InspectionProvider with ChangeNotifier {
   }
 
   void updateRecommendation({
-    String? qRec, DateTime? qDate,
-    String? sibNum, bool? sibGiven, DateTime? sibDate
+    String? qRec,
+    DateTime? qDate,
+    String? sibNum,
+    bool? sibGiven,
+    DateTime? sibDate,
   }) {
     if (qRec != null) _data.quarantineRecommendation = qRec;
     if (qDate != null) _data.quarantineRecommendationDate = qDate;
@@ -150,10 +179,46 @@ class InspectionProvider with ChangeNotifier {
     _data.kitchenClean = kitchenClean ?? _data.kitchenClean;
     _data.pantryClean = pantryClean ?? _data.pantryClean;
     _data.foodStorageClean = foodStorageClean ?? _data.foodStorageClean;
-    _data.wasteManagementGood = wasteManagementGood ?? _data.wasteManagementGood;
+    _data.wasteManagementGood =
+        wasteManagementGood ?? _data.wasteManagementGood;
     _data.vectorControlGood = vectorControlGood ?? _data.vectorControlGood;
     _data.sanitationNote = note ?? _data.sanitationNote;
     notifyListeners();
+  }
+
+  // --- SANITATION AREA METHODS (16 Areas) ---
+
+  void updateSanitationArea(
+    String areaKey, {
+    bool? qualify,
+    bool? unqualify,
+    bool? visibleSigns,
+    bool? noSigns,
+  }) {
+    final area = _data.sanitationAreas[areaKey];
+    if (area != null) {
+      _data.sanitationAreas[areaKey] = area.copyWith(
+        qualify: qualify,
+        unqualify: unqualify,
+        visibleSigns: visibleSigns,
+        noSigns: noSigns,
+      );
+      notifyListeners();
+    }
+  }
+
+  void updateSanitationNote(String? note) {
+    _data.sanitationNote = note;
+    notifyListeners();
+  }
+
+  void updateOtherAreaDescription(String? description) {
+    _data.otherAreaDescription = description;
+    notifyListeners();
+  }
+
+  SanitationAreaData? getSanitationArea(String areaKey) {
+    return _data.sanitationAreas[areaKey];
   }
 
   void updateHealthData({
@@ -165,7 +230,7 @@ class InspectionProvider with ChangeNotifier {
     // If crew/passenger are updated here, sync them back to general data
     if (crewCount != null) _data.crewCount = crewCount;
     if (passengerCount != null) _data.passengerCount = passengerCount;
-    
+
     _data.sickCount = sickCount ?? _data.sickCount;
     _data.symptoms = symptoms ?? _data.symptoms;
     notifyListeners();
