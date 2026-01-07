@@ -40,17 +40,19 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
               child: Row(
                 children: [
-                  _buildStepIndicator(1, 'Data Umum', true),
+                  _buildStepIndicator(1, 'Data Umum', true, false),
                   _buildStepLine(true),
-                  _buildStepIndicator(2, 'Data Khusus', true),
+                  _buildStepIndicator(2, 'Data Khusus', true, false),
                   _buildStepLine(true),
-                  _buildStepIndicator(3, 'Kesehatan', false),
+                  _buildStepIndicator(3, 'Sanitasi', true, false),
+                  _buildStepLine(true),
+                  _buildStepIndicator(4, 'Kesehatan', false, true),
                   _buildStepLine(false),
-                  _buildStepIndicator(4, 'TTD', false),
+                  _buildStepIndicator(5, 'TTD', false, false),
                 ],
               ),
             ),
-            
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -65,36 +67,76 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
                       children: [
                         Row(
                           children: [
-                            Expanded(child: _buildCountField('crewCount', 'ABK', Icons.person, provider.data.crewCount)),
+                            Expanded(
+                              child: _buildCountField(
+                                'crewCount',
+                                'ABK',
+                                Icons.person,
+                                provider.data.crewCount,
+                              ),
+                            ),
                             const Gap(12),
-                            Expanded(child: _buildCountField('passengerCount', 'Penumpang', Icons.people, provider.data.passengerCount)),
+                            Expanded(
+                              child: _buildCountField(
+                                'passengerCount',
+                                'Penumpang',
+                                Icons.people,
+                                provider.data.passengerCount,
+                              ),
+                            ),
                           ],
                         ),
                       ],
                     ),
-                    
+
                     const Gap(16),
-                    
+
                     // Health Status
                     _buildFormCard(
                       title: 'Status Kesehatan',
                       icon: Icons.medical_information,
                       iconColor: Colors.red,
                       children: [
-                        _buildCountField('sickCount', 'Jumlah Orang Sakit', Icons.sick, provider.data.sickCount),
+                        _buildCountField(
+                          'sickCount',
+                          'Jumlah Orang Sakit',
+                          Icons.sick,
+                          provider.data.sickCount,
+                        ),
                         const Gap(16),
-                        const Text('Gejala yang Ditemukan:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                        const Text(
+                          'Gejala yang Ditemukan:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
                         const Gap(8),
                         FormBuilderCheckboxGroup<String>(
                           name: 'symptoms',
                           initialValue: provider.data.symptoms,
-                          decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
                           options: [
-                            _buildSymptomOption('Demam', Icons.thermostat, '>38°C'),
+                            _buildSymptomOption(
+                              'Demam',
+                              Icons.thermostat,
+                              '>38°C',
+                            ),
                             _buildSymptomOption('Batuk', Icons.air, null),
                             _buildSymptomOption('Sesak Napas', Icons.air, null),
-                            _buildSymptomOption('Diare', Icons.water_drop, null),
-                            _buildSymptomOption('Ruam Kulit', Icons.healing, null),
+                            _buildSymptomOption(
+                              'Diare',
+                              Icons.water_drop,
+                              null,
+                            ),
+                            _buildSymptomOption(
+                              'Ruam Kulit',
+                              Icons.healing,
+                              null,
+                            ),
                             _buildSymptomOption('Muntah', Icons.sick, null),
                           ],
                           wrapSpacing: 8,
@@ -102,7 +144,7 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
                         ),
                       ],
                     ),
-                    
+
                     const Gap(100),
                   ],
                 ),
@@ -117,7 +159,10 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
         child: FloatingActionButton.extended(
           onPressed: _submitForm,
           icon: const Icon(Icons.arrow_forward),
-          label: const Text('Lanjut ke Tanda Tangan', style: TextStyle(fontWeight: FontWeight.w600)),
+          label: const Text(
+            'Lanjut ke Tanda Tangan',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           backgroundColor: theme.primaryColor,
           foregroundColor: Colors.white,
         ),
@@ -130,50 +175,66 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
       final provider = Provider.of<InspectionProvider>(context, listen: false);
-      
+
       provider.updateHealthData(
         crewCount: int.tryParse(values['crewCount'] ?? ''),
         passengerCount: int.tryParse(values['passengerCount'] ?? ''),
         sickCount: int.tryParse(values['sickCount'] ?? ''),
         symptoms: List<String>.from(values['symptoms'] ?? []),
       );
-      
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Step4SignatureScreen()));
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const Step4SignatureScreen()),
+      );
     }
   }
 
-  Widget _buildStepIndicator(int step, String label, bool isPast) {
+  Widget _buildStepIndicator(
+    int step,
+    String label,
+    bool isCompleted,
+    bool isCurrent,
+  ) {
+    Color bgColor = (isCompleted || isCurrent)
+        ? Colors.white
+        : Colors.white.withOpacity(0.3);
+    Color contentColor = Theme.of(context).primaryColor;
+    Color labelColor = (isCompleted || isCurrent)
+        ? Colors.white
+        : Colors.white.withOpacity(0.6);
+
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
             width: 28,
             height: 28,
-            decoration: BoxDecoration(
-              color: isPast ? Colors.white : Colors.white.withOpacity(0.3),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
             child: Center(
-              child: isPast 
-                ? Icon(Icons.check, color: Theme.of(context).primaryColor, size: 16)
-                : Text(
-                    '$step',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+              child: isCompleted
+                  ? Icon(Icons.check, color: contentColor, size: 16)
+                  : Text(
+                      '$step',
+                      style: TextStyle(
+                        color: contentColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
             ),
           ),
           const Gap(4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(isPast ? 1 : 0.6),
-              fontSize: 10,
+          SizedBox(
+            height: 24,
+            child: Text(
+              label,
+              style: TextStyle(color: labelColor, fontSize: 10),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -188,7 +249,12 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     );
   }
 
-  Widget _buildFormCard({required String title, required IconData icon, Color? iconColor, required List<Widget> children}) {
+  Widget _buildFormCard({
+    required String title,
+    required IconData icon,
+    Color? iconColor,
+    required List<Widget> children,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -211,13 +277,24 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                  color: (iconColor ?? Theme.of(context).primaryColor)
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor, size: 20),
+                child: Icon(
+                  icon,
+                  color: iconColor ?? Theme.of(context).primaryColor,
+                  size: 20,
+                ),
               ),
               const Gap(12),
-              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const Gap(16),
@@ -227,7 +304,12 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     );
   }
 
-  Widget _buildCountField(String name, String label, IconData icon, int? initialValue) {
+  Widget _buildCountField(
+    String name,
+    String label,
+    IconData icon,
+    int? initialValue,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -261,7 +343,11 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     );
   }
 
-  FormBuilderFieldOption<String> _buildSymptomOption(String value, IconData icon, String? subtitle) {
+  FormBuilderFieldOption<String> _buildSymptomOption(
+    String value,
+    IconData icon,
+    String? subtitle,
+  ) {
     return FormBuilderFieldOption(
       value: value,
       child: Container(
@@ -275,7 +361,10 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
           children: [
             Icon(icon, size: 16, color: Colors.grey[600]),
             const Gap(6),
-            Text(subtitle != null ? '$value ($subtitle)' : value, style: const TextStyle(fontSize: 12)),
+            Text(
+              subtitle != null ? '$value ($subtitle)' : value,
+              style: const TextStyle(fontSize: 12),
+            ),
           ],
         ),
       ),

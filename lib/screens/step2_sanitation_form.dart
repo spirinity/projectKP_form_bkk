@@ -15,21 +15,14 @@ class Step2SanitationForm extends StatefulWidget {
 
 class _Step2SanitationFormState extends State<Step2SanitationForm> {
   final _formKey = GlobalKey<FormBuilderState>();
-  final _noteController = TextEditingController();
-  final _otherAreaController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    final provider = Provider.of<InspectionProvider>(context, listen: false);
-    _noteController.text = provider.data.sanitationNote ?? '';
-    _otherAreaController.text = provider.data.otherAreaDescription ?? '';
   }
 
   @override
   void dispose() {
-    _noteController.dispose();
-    _otherAreaController.dispose();
     super.dispose();
   }
 
@@ -56,13 +49,15 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
               child: Row(
                 children: [
-                  _buildStepIndicator(1, 'Data Umum', true),
+                  _buildStepIndicator(1, 'Data Umum', true, false),
                   _buildStepLine(true),
-                  _buildStepIndicator(2, 'Data Khusus', true),
+                  _buildStepIndicator(2, 'Data Khusus', true, false),
                   _buildStepLine(true),
-                  _buildStepIndicator(3, 'Sanitasi', false),
+                  _buildStepIndicator(3, 'Sanitasi', false, true),
                   _buildStepLine(false),
-                  _buildStepIndicator(4, 'TTD', false),
+                  _buildStepIndicator(4, 'Kesehatan', false, false),
+                  _buildStepLine(false),
+                  _buildStepIndicator(5, 'TTD', false, false),
                 ],
               ),
             ),
@@ -109,59 +104,6 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
                     _buildSanitationTableCard(),
 
                     const Gap(16),
-
-                    // Other Area Description
-                    _buildFormCard(
-                      title: 'Deskripsi Area Lainnya',
-                      icon: Icons.edit_note,
-                      iconColor: Colors.orange,
-                      children: [
-                        TextField(
-                          controller: _otherAreaController,
-                          maxLines: 2,
-                          decoration: InputDecoration(
-                            hintText:
-                                'Jelaskan area lainnya yang diperiksa (jika ada)...',
-                            hintStyle: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[400],
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const Gap(16),
-
-                    // Notes Card
-                    _buildFormCard(
-                      title: 'Catatan Tambahan',
-                      icon: Icons.note_add,
-                      iconColor: Colors.indigo,
-                      children: [
-                        TextField(
-                          controller: _noteController,
-                          maxLines: 3,
-                          decoration: InputDecoration(
-                            hintText: 'Catatan pemeriksaan sanitasi...',
-                            hintStyle: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[400],
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
-                        ),
-                      ],
-                    ),
 
                     const Gap(100),
                   ],
@@ -581,11 +523,7 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
   }
 
   void _submitForm() {
-    final provider = Provider.of<InspectionProvider>(context, listen: false);
-
-    // Save notes
-    provider.updateSanitationNote(_noteController.text);
-    provider.updateOtherAreaDescription(_otherAreaController.text);
+    // Save notes - removed per request
 
     Navigator.push(
       context,
@@ -593,28 +531,35 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
     );
   }
 
-  Widget _buildStepIndicator(int step, String label, bool isPast) {
+  Widget _buildStepIndicator(
+    int step,
+    String label,
+    bool isCompleted,
+    bool isCurrent,
+  ) {
+    Color bgColor = (isCompleted || isCurrent)
+        ? Colors.white
+        : Colors.white.withOpacity(0.3);
+    Color contentColor = Theme.of(context).primaryColor;
+    Color labelColor = (isCompleted || isCurrent)
+        ? Colors.white
+        : Colors.white.withOpacity(0.6);
+
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
             width: 28,
             height: 28,
-            decoration: BoxDecoration(
-              color: isPast ? Colors.white : Colors.white.withOpacity(0.3),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
             child: Center(
-              child: isPast
-                  ? Icon(
-                      Icons.check,
-                      color: Theme.of(context).primaryColor,
-                      size: 16,
-                    )
+              child: isCompleted
+                  ? Icon(Icons.check, color: contentColor, size: 16)
                   : Text(
                       '$step',
                       style: TextStyle(
-                        color: Theme.of(context).primaryColor,
+                        color: contentColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -622,13 +567,15 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
             ),
           ),
           const Gap(4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(isPast ? 1 : 0.6),
-              fontSize: 10,
+          SizedBox(
+            height: 24,
+            child: Text(
+              label,
+              style: TextStyle(color: labelColor, fontSize: 10),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -640,61 +587,6 @@ class _Step2SanitationFormState extends State<Step2SanitationForm> {
       width: 20,
       height: 2,
       color: isCompleted ? Colors.white : Colors.white.withOpacity(0.3),
-    );
-  }
-
-  Widget _buildFormCard({
-    required String title,
-    required IconData icon,
-    Color? iconColor,
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (iconColor ?? Theme.of(context).primaryColor)
-                      .withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? Theme.of(context).primaryColor,
-                  size: 20,
-                ),
-              ),
-              const Gap(12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const Gap(16),
-          ...children,
-        ],
-      ),
     );
   }
 }

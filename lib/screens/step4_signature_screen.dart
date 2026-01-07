@@ -24,7 +24,7 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     penColor: Colors.black,
     exportBackgroundColor: Colors.white,
   );
-  
+
   final TextEditingController _officerNameController = TextEditingController();
 
   @override
@@ -56,17 +56,19 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
             child: Row(
               children: [
-                _buildStepIndicator(1, 'Data Umum', true),
+                _buildStepIndicator(1, 'Data Umum', true, false),
                 _buildStepLine(true),
-                _buildStepIndicator(2, 'Data Khusus', true),
+                _buildStepIndicator(2, 'Data Khusus', true, false),
                 _buildStepLine(true),
-                _buildStepIndicator(3, 'Kesehatan', true),
+                _buildStepIndicator(3, 'Sanitasi', true, false),
                 _buildStepLine(true),
-                _buildStepIndicator(4, 'TTD', false),
+                _buildStepIndicator(4, 'Kesehatan', true, false),
+                _buildStepLine(true),
+                _buildStepIndicator(5, 'TTD', false, true),
               ],
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -80,9 +82,9 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
                     iconColor: Colors.blue,
                     controller: _captainController,
                   ),
-                  
+
                   const Gap(16),
-                  
+
                   // Officer Signature
                   _buildFormCard(
                     title: 'Petugas Pemeriksa',
@@ -94,13 +96,21 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
                         decoration: InputDecoration(
                           labelText: 'Nama Petugas',
                           prefixIcon: const Icon(Icons.person_pin, size: 20),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.grey[50],
                         ),
                       ),
                       const Gap(16),
-                      const Text('Tanda Tangan Petugas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                      const Text(
+                        'Tanda Tangan Petugas',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
+                      ),
                       const Gap(8),
                       Container(
                         decoration: BoxDecoration(
@@ -123,12 +133,15 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
                         child: TextButton.icon(
                           onPressed: () => _officerController.clear(),
                           icon: const Icon(Icons.refresh, size: 18),
-                          label: const Text('Hapus', style: TextStyle(fontSize: 12)),
+                          label: const Text(
+                            'Hapus',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  
+
                   const Gap(100),
                 ],
               ),
@@ -142,7 +155,10 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
         child: FloatingActionButton.extended(
           onPressed: _submitForm,
           icon: const Icon(Icons.check_circle),
-          label: const Text('Selesai & Preview PDF', style: TextStyle(fontWeight: FontWeight.w600)),
+          label: const Text(
+            'Selesai & Preview PDF',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           backgroundColor: Colors.green,
           foregroundColor: Colors.white,
         ),
@@ -152,12 +168,18 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (_captainController.isEmpty || _officerController.isEmpty || _officerNameController.text.isEmpty) {
+    if (_captainController.isEmpty ||
+        _officerController.isEmpty ||
+        _officerNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Harap lengkapi Nama Petugas dan kedua Tanda Tangan.'),
+          content: const Text(
+            'Harap lengkapi Nama Petugas dan kedua Tanda Tangan.',
+          ),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -165,7 +187,7 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     }
 
     final provider = Provider.of<InspectionProvider>(context, listen: false);
-    
+
     // Export signatures to bytes
     final captainBytes = await _captainController.toPngBytes();
     final officerBytes = await _officerController.toPngBytes();
@@ -174,45 +196,61 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
       provider.setCaptainSignature(captainBytes);
       provider.setOfficerSignature(officerBytes);
       provider.setOfficerName(_officerNameController.text);
-      
+
       if (context.mounted) {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const PreviewScreen()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PreviewScreen()),
+        );
       }
     }
   }
 
-  Widget _buildStepIndicator(int step, String label, bool isPast) {
+  Widget _buildStepIndicator(
+    int step,
+    String label,
+    bool isCompleted,
+    bool isCurrent,
+  ) {
+    Color bgColor = (isCompleted || isCurrent)
+        ? Colors.white
+        : Colors.white.withOpacity(0.3);
+    Color contentColor = Theme.of(context).primaryColor;
+    Color labelColor = (isCompleted || isCurrent)
+        ? Colors.white
+        : Colors.white.withOpacity(0.6);
+
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
             width: 28,
             height: 28,
-            decoration: BoxDecoration(
-              color: isPast ? Colors.white : Colors.white.withOpacity(0.3),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
             child: Center(
-              child: isPast 
-                ? Icon(Icons.check, color: Theme.of(context).primaryColor, size: 16)
-                : Text(
-                    '$step',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+              child: isCompleted
+                  ? Icon(Icons.check, color: contentColor, size: 16)
+                  : Text(
+                      '$step',
+                      style: TextStyle(
+                        color: contentColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
             ),
           ),
           const Gap(4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(isPast ? 1 : 0.6),
-              fontSize: 10,
+          SizedBox(
+            height: 24,
+            child: Text(
+              label,
+              style: TextStyle(color: labelColor, fontSize: 10),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -227,7 +265,12 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     );
   }
 
-  Widget _buildSignatureCard({required String title, required IconData icon, Color? iconColor, required SignatureController controller}) {
+  Widget _buildSignatureCard({
+    required String title,
+    required IconData icon,
+    Color? iconColor,
+    required SignatureController controller,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -250,13 +293,24 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                  color: (iconColor ?? Theme.of(context).primaryColor)
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor, size: 20),
+                child: Icon(
+                  icon,
+                  color: iconColor ?? Theme.of(context).primaryColor,
+                  size: 20,
+                ),
               ),
               const Gap(12),
-              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const Gap(16),
@@ -289,7 +343,12 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     );
   }
 
-  Widget _buildFormCard({required String title, required IconData icon, Color? iconColor, required List<Widget> children}) {
+  Widget _buildFormCard({
+    required String title,
+    required IconData icon,
+    Color? iconColor,
+    required List<Widget> children,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -312,13 +371,24 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                  color: (iconColor ?? Theme.of(context).primaryColor)
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor, size: 20),
+                child: Icon(
+                  icon,
+                  color: iconColor ?? Theme.of(context).primaryColor,
+                  size: 20,
+                ),
               ),
               const Gap(12),
-              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const Gap(16),

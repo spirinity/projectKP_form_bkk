@@ -42,19 +42,21 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                 children: [
                   Row(
                     children: [
-                      _buildStepIndicator(1, 'Data Umum', true),
+                      _buildStepIndicator(1, 'Data Umum', false, true),
                       _buildStepLine(false),
-                      _buildStepIndicator(2, 'Data Khusus', false),
+                      _buildStepIndicator(2, 'Data Khusus', false, false),
                       _buildStepLine(false),
-                      _buildStepIndicator(3, 'Sanitasi', false),
+                      _buildStepIndicator(3, 'Sanitasi', false, false),
                       _buildStepLine(false),
-                      _buildStepIndicator(4, 'TTD', false),
+                      _buildStepIndicator(4, 'Kesehatan', false, false),
+                      _buildStepLine(false),
+                      _buildStepIndicator(5, 'TTD', false, false),
                     ],
                   ),
                 ],
               ),
             ),
-            
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -66,46 +68,120 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                       title: 'Identitas Kapal',
                       icon: Icons.directions_boat,
                       children: [
-                        _buildTextField('shipName', 'Nama Kapal', provider.data.shipName, required: true, icon: Icons.badge),
-                        _buildTextField('flag', 'Bendera Kebangsaan', provider.data.flag, icon: Icons.flag),
-                        _buildTextField('grossTonnage', 'Besar Kapal (GT)', provider.data.grossTonnage, icon: Icons.scale, keyboardType: TextInputType.number),
-                        _buildTextField('imoNumber', 'No. IMO', provider.data.imoNumber, icon: Icons.numbers),
+                        _buildTextField(
+                          'shipName',
+                          'Nama Kapal',
+                          provider.data.shipName,
+                          required: true,
+                          icon: Icons.badge,
+                        ),
+                        _buildTextField(
+                          'flag',
+                          'Bendera Kebangsaan',
+                          provider.data.flag,
+                          icon: Icons.flag,
+                        ),
+                        _buildTextField(
+                          'grossTonnage',
+                          'Besar Kapal (GT)',
+                          provider.data.grossTonnage,
+                          icon: Icons.scale,
+                          keyboardType: TextInputType.number,
+                        ),
+                        _buildTextField(
+                          'imoNumber',
+                          'No. IMO',
+                          provider.data.imoNumber,
+                          icon: Icons.numbers,
+                        ),
                       ],
                     ),
-                    
+
                     const Gap(16),
-                    
+
                     _buildFormCard(
                       title: 'Perjalanan',
                       icon: Icons.route,
                       children: [
-                        _buildTextField('lastPort', 'Datang Dari', provider.data.lastPort, icon: Icons.flight_land),
-                        _buildDateField('arrivalDate', 'Tanggal Kedatangan', provider.data.arrivalDate),
-                        _buildTextField('nextPort', 'Tujuan', provider.data.nextPort, icon: Icons.flight_takeoff),
-                        _buildDateField('departureDate', 'Tanggal Tujuan (Estimasi)', provider.data.departureDate),
-                        _buildTextField('dockLocation', 'Lokasi Sandar', provider.data.dockLocation, icon: Icons.location_on),
+                        _buildTextField(
+                          'lastPort',
+                          'Datang Dari',
+                          provider.data.lastPort,
+                          icon: Icons.flight_land,
+                        ),
+                        _buildDateField(
+                          'arrivalDate',
+                          'Tanggal Kedatangan',
+                          provider.data.arrivalDate,
+                        ),
+                        _buildTextField(
+                          'nextPort',
+                          'Tujuan',
+                          provider.data.nextPort,
+                          icon: Icons.flight_takeoff,
+                        ),
+                        _buildDateField(
+                          'departureDate',
+                          'Tanggal Tujuan (Estimasi)',
+                          provider.data.departureDate,
+                        ),
+                        _buildTextField(
+                          'dockLocation',
+                          'Lokasi Sandar',
+                          provider.data.dockLocation,
+                          icon: Icons.location_on,
+                        ),
                       ],
                     ),
-                    
+
                     const Gap(16),
-                    
+
                     _buildFormCard(
                       title: 'Personel & Keagenan',
                       icon: Icons.people,
                       children: [
-                        _buildTextField('captainName', 'Nama Nahkoda', provider.data.captainName, icon: Icons.person),
+                        _buildTextField(
+                          'captainName',
+                          'Nama Nahkoda',
+                          provider.data.captainName,
+                          icon: Icons.person,
+                        ),
                         Row(
                           children: [
-                            Expanded(child: _buildTextField('crewCount', 'Jml ABK', provider.data.crewCount?.toString(), keyboardType: TextInputType.number)),
+                            Expanded(
+                              child: _buildTextField(
+                                'crewCount',
+                                'Jml ABK',
+                                provider.data.crewCount?.toString(),
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
                             const Gap(12),
-                            Expanded(child: _buildTextField('passengerCount', 'Jml Penumpang', provider.data.passengerCount?.toString(), keyboardType: TextInputType.number)),
+                            Expanded(
+                              child: _buildTextField(
+                                'passengerCount',
+                                'Jml Penumpang',
+                                provider.data.passengerCount?.toString(),
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
                           ],
                         ),
-                        _buildTextField('unregisteredPassengers', 'Penumpang Tidak Terdaftar', provider.data.unregisteredPassengers?.toString(), keyboardType: TextInputType.number),
-                        _buildTextField('agency', 'Keagenan', provider.data.agency, icon: Icons.business),
+                        _buildTextField(
+                          'unregisteredPassengers',
+                          'Penumpang Tidak Terdaftar',
+                          provider.data.unregisteredPassengers?.toString(),
+                          keyboardType: TextInputType.number,
+                        ),
+                        _buildTextField(
+                          'agency',
+                          'Keagenan',
+                          provider.data.agency,
+                          icon: Icons.business,
+                        ),
                       ],
                     ),
-                    
+
                     const Gap(100), // Space for FAB
                   ],
                 ),
@@ -120,7 +196,10 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
         child: FloatingActionButton.extended(
           onPressed: _submitForm,
           icon: const Icon(Icons.arrow_forward),
-          label: const Text('Lanjut ke Data Khusus', style: TextStyle(fontWeight: FontWeight.w600)),
+          label: const Text(
+            'Lanjut ke Data Khusus',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           backgroundColor: theme.primaryColor,
           foregroundColor: Colors.white,
         ),
@@ -133,8 +212,9 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
       final provider = Provider.of<InspectionProvider>(context, listen: false);
-      
-      int? parseInt(dynamic val) => val is String ? int.tryParse(val) : (val is int ? val : null);
+
+      int? parseInt(dynamic val) =>
+          val is String ? int.tryParse(val) : (val is int ? val : null);
 
       provider.updateGeneralData(
         shipName: values['shipName'],
@@ -152,40 +232,61 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
         unregisteredPassengers: parseInt(values['unregisteredPassengers']),
         agency: values['agency'],
       );
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Step1BDataKhusus()));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const Step1BDataKhusus()),
+      );
     }
   }
 
-  Widget _buildStepIndicator(int step, String label, bool isActive) {
+  Widget _buildStepIndicator(
+    int step,
+    String label,
+    bool isCompleted,
+    bool isCurrent,
+  ) {
+    Color bgColor;
+    if (isCompleted || isCurrent) {
+      bgColor = Colors.white;
+    } else {
+      bgColor = Colors.white.withOpacity(0.3);
+    }
+    Color contentColor = Theme.of(context).primaryColor;
+    Color labelColor = (isCompleted || isCurrent)
+        ? Colors.white
+        : Colors.white.withOpacity(0.6);
+
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
             width: 28,
             height: 28,
-            decoration: BoxDecoration(
-              color: isActive ? Colors.white : Colors.white.withOpacity(0.3),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
             child: Center(
-              child: Text(
-                '$step',
-                style: TextStyle(
-                  color: isActive ? Theme.of(context).primaryColor : Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
+              child: isCompleted
+                  ? Icon(Icons.check, color: contentColor, size: 16)
+                  : Text(
+                      '$step',
+                      style: TextStyle(
+                        color: contentColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
             ),
           ),
           const Gap(4),
-          Text(
-            label,
-            style: TextStyle(
-              color: isActive ? Colors.white : Colors.white.withOpacity(0.6),
-              fontSize: 10,
+          SizedBox(
+            height: 24,
+            child: Text(
+              label,
+              style: TextStyle(color: labelColor, fontSize: 10),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -200,7 +301,11 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
     );
   }
 
-  Widget _buildFormCard({required String title, required IconData icon, required List<Widget> children}) {
+  Widget _buildFormCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -226,10 +331,20 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                   color: Theme.of(context).primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).primaryColor,
+                  size: 20,
+                ),
               ),
               const Gap(12),
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const Gap(16),
@@ -239,7 +354,14 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
     );
   }
 
-  Widget _buildTextField(String name, String label, String? initialValue, {IconData? icon, bool required = false, TextInputType? keyboardType}) {
+  Widget _buildTextField(
+    String name,
+    String label,
+    String? initialValue, {
+    IconData? icon,
+    bool required = false,
+    TextInputType? keyboardType,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: FormBuilderTextField(
@@ -252,7 +374,10 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.grey[50],
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
         validator: required ? FormBuilderValidators.required() : null,
       ),
@@ -272,7 +397,10 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.grey[50],
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
       ),
     );
