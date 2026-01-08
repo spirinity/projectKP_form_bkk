@@ -361,6 +361,8 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
         return InputDecorator(
           decoration: InputDecoration(
             border: InputBorder.none,
+            filled: false,
+            fillColor: Colors.transparent,
             errorText: field.errorText,
             contentPadding: EdgeInsets.zero,
           ),
