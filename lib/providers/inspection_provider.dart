@@ -221,6 +221,28 @@ class InspectionProvider with ChangeNotifier {
     return _data.sanitationAreas[areaKey];
   }
 
+  void updateHealthDataPdf({
+    int? crewHealthyCount,
+    int? crewSickCount,
+    int? passengerHealthyCount,
+    int? passengerSickCount,
+    String? icvCertificateCount,
+    String? icvStatus,
+    String? p3kStatus,
+  }) {
+    if (crewHealthyCount != null) _data.crewHealthyCount = crewHealthyCount;
+    if (crewSickCount != null) _data.crewSickCount = crewSickCount;
+    if (passengerHealthyCount != null)
+      _data.passengerHealthyCount = passengerHealthyCount;
+    if (passengerSickCount != null)
+      _data.passengerSickCount = passengerSickCount;
+    if (icvCertificateCount != null)
+      _data.icvCertificateCount = icvCertificateCount;
+    if (icvStatus != null) _data.icvStatus = icvStatus;
+    if (p3kStatus != null) _data.p3kStatus = p3kStatus;
+    notifyListeners();
+  }
+
   void updateHealthData({
     int? crewCount,
     int? passengerCount,

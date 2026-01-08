@@ -21,6 +21,10 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     final provider = Provider.of<InspectionProvider>(context, listen: false);
     final theme = Theme.of(context);
 
+    // Get total counts from previous step
+    final crewTotal = provider.data.crewCount ?? 0;
+    final passengerTotal = provider.data.passengerCount ?? 0;
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -59,90 +63,274 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Data Counts
-                    _buildFormCard(
-                      title: 'Jumlah Personel',
-                      icon: Icons.group,
-                      iconColor: Colors.blue,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildCountField(
-                                'crewCount',
-                                'ABK',
-                                Icons.person,
-                                provider.data.crewCount,
+                    // --- CARD 1: JUMLAH PERSONEL (READ ONLY) ---
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.groups,
+                                  color: Colors.blue,
+                                  size: 20,
+                                ),
                               ),
-                            ),
-                            const Gap(12),
-                            Expanded(
-                              child: _buildCountField(
-                                'passengerCount',
-                                'Penumpang',
-                                Icons.people,
-                                provider.data.passengerCount,
+                              const Gap(12),
+                              const Text(
+                                'Jumlah Personel',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                          const Gap(16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildDisplayItem(
+                                  label: 'ABK',
+                                  value: crewTotal.toString(),
+                                  icon: Icons.person,
+                                ),
+                              ),
+                              const Gap(12),
+                              Expanded(
+                                child: _buildDisplayItem(
+                                  label: 'Penumpang',
+                                  value: passengerTotal.toString(),
+                                  icon: Icons.groups,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
 
                     const Gap(16),
 
-                    // Health Status
-                    _buildFormCard(
-                      title: 'Status Kesehatan',
-                      icon: Icons.medical_information,
-                      iconColor: Colors.red,
-                      children: [
-                        _buildCountField(
-                          'sickCount',
-                          'Jumlah Orang Sakit',
-                          Icons.sick,
-                          provider.data.sickCount,
-                        ),
-                        const Gap(16),
-                        const Text(
-                          'Gejala yang Ditemukan:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                    // --- CARD 2: STATUS KESEHATAN (INPUTS) ---
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
-                        const Gap(8),
-                        FormBuilderCheckboxGroup<String>(
-                          name: 'symptoms',
-                          initialValue: provider.data.symptoms,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.medical_information,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                              ),
+                              const Gap(12),
+                              const Text(
+                                'Status Kesehatan',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          options: [
-                            _buildSymptomOption(
-                              'Demam',
-                              Icons.thermostat,
-                              '>38°C',
+                          const Gap(24),
+
+                          // ABK INPUTS
+                          const Text(
+                            'Kesehatan ABK',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
                             ),
-                            _buildSymptomOption('Batuk', Icons.air, null),
-                            _buildSymptomOption('Sesak Napas', Icons.air, null),
-                            _buildSymptomOption(
-                              'Diare',
-                              Icons.water_drop,
-                              null,
+                          ),
+                          const Gap(12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildStickerCounter(
+                                  name: 'crewHealthyCount',
+                                  label: 'Sehat',
+                                  icon: Icons.sentiment_satisfied_alt,
+                                  max: crewTotal,
+                                  initialValue:
+                                      provider.data.crewHealthyCount ??
+                                      crewTotal,
+                                  onChanged: (val) {
+                                    _updateOppositeCount(
+                                      newValue: val,
+                                      oppositeField: 'crewSickCount',
+                                      total: crewTotal,
+                                    );
+                                  },
+                                ),
+                              ),
+                              const Gap(12),
+                              Expanded(
+                                child: _buildStickerCounter(
+                                  name: 'crewSickCount',
+                                  label: 'Sakit',
+                                  icon: Icons.sick,
+                                  max: crewTotal,
+                                  initialValue:
+                                      provider.data.crewSickCount ?? 0,
+                                  onChanged: (val) {
+                                    _updateOppositeCount(
+                                      newValue: val,
+                                      oppositeField: 'crewHealthyCount',
+                                      total: crewTotal,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const Gap(24),
+
+                          // PASSENGER INPUTS
+                          const Text(
+                            'Kesehatan Penumpang',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
                             ),
-                            _buildSymptomOption(
-                              'Ruam Kulit',
-                              Icons.healing,
-                              null,
+                          ),
+                          const Gap(12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildStickerCounter(
+                                  name: 'passengerHealthyCount',
+                                  label: 'Sehat',
+                                  icon: Icons.sentiment_satisfied_alt,
+                                  max: passengerTotal,
+                                  initialValue:
+                                      provider.data.passengerHealthyCount ??
+                                      passengerTotal,
+                                  onChanged: (val) {
+                                    _updateOppositeCount(
+                                      newValue: val,
+                                      oppositeField: 'passengerSickCount',
+                                      total: passengerTotal,
+                                    );
+                                  },
+                                ),
+                              ),
+                              const Gap(12),
+                              Expanded(
+                                child: _buildStickerCounter(
+                                  name: 'passengerSickCount',
+                                  label: 'Sakit',
+                                  icon: Icons.sick,
+                                  max: passengerTotal,
+                                  initialValue:
+                                      provider.data.passengerSickCount ?? 0,
+                                  onChanged: (val) {
+                                    _updateOppositeCount(
+                                      newValue: val,
+                                      oppositeField: 'passengerHealthyCount',
+                                      total: passengerTotal,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const Gap(24),
+                          const Divider(),
+                          const Gap(16),
+
+                          // DOCUMENTS INPUTS
+                          const Text(
+                            'Dokumen Kesehatan / Health Document',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
-                            _buildSymptomOption('Muntah', Icons.sick, null),
-                          ],
-                          wrapSpacing: 8,
-                          wrapRunSpacing: 8,
-                        ),
-                      ],
+                          ),
+                          const Gap(12),
+                          // ICV / Vaccination
+                          _buildDocumentRadio(
+                            title: 'ICV / Vaccination',
+                            name: 'icvStatus',
+                            initialValue: provider.data.icvStatus ?? 'Lengkap',
+                            options: ['Lengkap', 'Tidak Lengkap'],
+                          ),
+                          const Gap(8),
+                          // ICV Text Input (Validation: Alphanumeric, Max 13)
+                          FormBuilderTextField(
+                            name: 'icvCertificateCount',
+                            initialValue: provider.data.icvCertificateCount,
+                            decoration: InputDecoration(
+                              labelText: 'Nomor/Jumlah Sertifikat',
+                              hintText: 'Max 13 karakter (Huruf/Angka)',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[50],
+                              counterText:
+                                  '', // Hide default character counter if preferred, or show it. Using maxLength usually shows it.
+                            ),
+                            maxLength: 13,
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.maxLength(13),
+                              // Custom validator for alphanumeric if strictly required, but usually alphanumeric includes symbols per user request "bisa huruf angka dan simbol" which is basically 'text'
+                              // So just Max Length 13 is the main constraint.
+                            ]),
+                          ),
+                          const Gap(12),
+                          // Sertifikat PPPK
+                          _buildDocumentRadio(
+                            title: 'Sertifikat PPPK',
+                            subtitle: 'First Aid Equipment Certificate',
+                            name: 'p3kStatus',
+                            initialValue: provider.data.p3kStatus ?? 'Tersedia',
+                            options: ['Tersedia', 'Tidak Tersedia'],
+                          ),
+                        ],
+                      ),
                     ),
 
                     const Gap(100),
@@ -171,16 +359,43 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     );
   }
 
+  bool _isUpdating = false;
+
+  void _updateOppositeCount({
+    required int newValue,
+    required String oppositeField,
+    required int total,
+  }) {
+    if (_isUpdating) return;
+
+    int oppositeValue = total - newValue;
+    if (oppositeValue < 0) oppositeValue = 0;
+
+    _isUpdating = true;
+    try {
+      _formKey.currentState?.fields[oppositeField]?.didChange(
+        oppositeValue.toString(),
+      );
+    } finally {
+      _isUpdating = false;
+    }
+  }
+
   void _submitForm() {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
       final provider = Provider.of<InspectionProvider>(context, listen: false);
 
-      provider.updateHealthData(
-        crewCount: int.tryParse(values['crewCount'] ?? ''),
-        passengerCount: int.tryParse(values['passengerCount'] ?? ''),
-        sickCount: int.tryParse(values['sickCount'] ?? ''),
-        symptoms: List<String>.from(values['symptoms'] ?? []),
+      provider.updateHealthDataPdf(
+        crewHealthyCount: int.tryParse(values['crewHealthyCount'] ?? ''),
+        crewSickCount: int.tryParse(values['crewSickCount'] ?? ''),
+        passengerHealthyCount: int.tryParse(
+          values['passengerHealthyCount'] ?? '',
+        ),
+        passengerSickCount: int.tryParse(values['passengerSickCount'] ?? ''),
+        icvCertificateCount: values['icvCertificateCount'], // Now String
+        icvStatus: values['icvStatus'],
+        p3kStatus: values['p3kStatus'],
       );
 
       Navigator.push(
@@ -249,67 +464,46 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     );
   }
 
-  Widget _buildFormCard({
-    required String title,
+  Widget _buildDisplayItem({
+    required String label,
+    required String value,
     required IconData icon,
-    Color? iconColor,
-    required List<Widget> children,
   }) {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.grey[50], // Neutral
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (iconColor ?? Theme.of(context).primaryColor)
-                      .withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? Theme.of(context).primaryColor,
-                  size: 20,
-                ),
-              ),
-              const Gap(12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          Icon(icon, size: 28, color: Colors.grey[600]),
+          const Gap(8),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          const Gap(8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
-          const Gap(16),
-          ...children,
         ],
       ),
     );
   }
 
-  Widget _buildCountField(
-    String name,
-    String label,
-    IconData icon,
-    int? initialValue,
-  ) {
+  // Vertical layout matching user screenshot + Small buttons
+  Widget _buildStickerCounter({
+    required String name,
+    required String label,
+    required IconData icon,
+    required int max,
+    required int initialValue,
+    required Function(int) onChanged,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -319,55 +513,141 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
       ),
       child: Column(
         children: [
-          Icon(icon, size: 32, color: Colors.grey[600]),
+          Icon(icon, size: 28, color: Colors.grey[600]),
           const Gap(8),
           Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-          const Gap(8),
-          FormBuilderTextField(
-            name: name,
-            initialValue: initialValue?.toString() ?? '0',
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
+          const Gap(12),
+          // Counter Box
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.grey[100], // Darker grey for input box
+              borderRadius: BorderRadius.circular(8),
             ),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(),
-              FormBuilderValidators.integer(),
-            ]),
+            child: Row(
+              children: [
+                // Subtract Button (Hidden/Ghost or small)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      final formState = _formKey.currentState;
+                      final field = formState?.fields[name];
+                      if (field != null) {
+                        final curr = int.tryParse(field.value ?? '0') ?? 0;
+                        if (curr > 0) {
+                          final newVal = curr - 1;
+                          field.didChange(newVal.toString());
+                          onChanged(newVal);
+                        }
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: 30,
+                      height: double.infinity,
+                      child: Icon(
+                        Icons.remove,
+                        size: 16,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Number Display
+                Expanded(
+                  child: FormBuilderTextField(
+                    name: name,
+                    initialValue: initialValue.toString(),
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      isDense: true,
+                    ),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.integer(),
+                      FormBuilderValidators.max(max),
+                      FormBuilderValidators.min(0),
+                    ]),
+                    onChanged: (val) {
+                      if (!_isUpdating && val != null) {
+                        final v = int.tryParse(val) ?? 0;
+                        if (v >= 0 && v <= max) {
+                          onChanged(v);
+                        }
+                      }
+                    },
+                  ),
+                ),
+
+                // Add Button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      final formState = _formKey.currentState;
+                      final field = formState?.fields[name];
+                      if (field != null) {
+                        final curr = int.tryParse(field.value ?? '0') ?? 0;
+                        if (curr < max) {
+                          final newVal = curr + 1;
+                          field.didChange(newVal.toString());
+                          onChanged(newVal);
+                        }
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: 30,
+                      height: double.infinity,
+                      child: Icon(Icons.add, size: 16, color: Colors.grey[500]),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  FormBuilderFieldOption<String> _buildSymptomOption(
-    String value,
-    IconData icon,
+  Widget _buildDocumentRadio({
+    required String title,
     String? subtitle,
-  ) {
-    return FormBuilderFieldOption(
-      value: value,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(8),
+    required String name,
+    required String initialValue,
+    required List<String> options,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        if (subtitle != null)
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+        FormBuilderRadioGroup<String>(
+          name: name,
+          initialValue: initialValue,
+          options: options
+              .map((opt) => FormBuilderFieldOption(value: opt))
+              .toList(),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.zero,
+          ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: Colors.grey[600]),
-            const Gap(6),
-            Text(
-              subtitle != null ? '$value ($subtitle)' : value,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }

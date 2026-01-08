@@ -207,7 +207,15 @@ class InspectionModel {
   bool wasteManagementGood;
   bool vectorControlGood;
 
-  // Health
+  // Health (New Fields for PDF Alignment)
+  int? crewHealthyCount;
+  int? crewSickCount;
+  int? passengerHealthyCount;
+  int? passengerSickCount;
+  String?
+  icvCertificateCount; // Jumlah sertifikat yang diperiksa (String allow alphanumeric)
+
+  // Legacy (Keep if needed, or remove if fully replaced)
   int sickCount;
   List<String> symptoms;
 
@@ -249,6 +257,12 @@ class InspectionModel {
     this.p3kExpiry,
     this.p3kStatus,
     this.p3kNote,
+    // New fields
+    this.crewHealthyCount,
+    this.crewSickCount,
+    this.passengerHealthyCount,
+    this.passengerSickCount,
+    this.icvCertificateCount,
     this.healthBookPlace,
     this.healthBookDate,
     this.healthBookStatus,
