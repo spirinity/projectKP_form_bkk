@@ -16,13 +16,13 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
   final SignatureController _captainController = SignatureController(
     penStrokeWidth: 3,
     penColor: Colors.black,
-    exportBackgroundColor: Colors.transparent,
+    exportBackgroundColor: Colors.white,
   );
 
   final SignatureController _officerController = SignatureController(
     penStrokeWidth: 3,
     penColor: Colors.black,
-    exportBackgroundColor: Colors.transparent,
+    exportBackgroundColor: Colors.white,
   );
   
   final TextEditingController _officerNameController = TextEditingController();
@@ -37,115 +37,293 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<InspectionProvider>(context, listen: false);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Langkah 4: Tanda Tangan')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-             const Text(
-              'Tanda Tangan Nahkoda',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Gap(8),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Signature(
-                controller: _captainController,
-                height: 200,
-                backgroundColor: Colors.white,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text('Tanda Tangan'),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      body: Column(
+        children: [
+          // Progress Indicator
+          Container(
+            color: theme.primaryColor,
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+            child: Row(
               children: [
-                TextButton(
-                  onPressed: () => _captainController.clear(),
-                  child: const Text('Hapus / Ulangi'),
-                ),
+                _buildStepIndicator(1, 'Data Umum', true),
+                _buildStepLine(true),
+                _buildStepIndicator(2, 'Data Khusus', true),
+                _buildStepLine(true),
+                _buildStepIndicator(3, 'Kesehatan', true),
+                _buildStepLine(true),
+                _buildStepIndicator(4, 'TTD', false),
               ],
             ),
-            
-            const Gap(24),
-            
-            const Text(
-              'Petugas Pemeriksa',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Gap(8),
-            TextField(
-              controller: _officerNameController,
-              decoration: const InputDecoration(
-                labelText: 'Nama Petugas',
-                prefixIcon: Icon(Icons.person_pin),
+          ),
+          
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Captain Signature
+                  _buildSignatureCard(
+                    title: 'Tanda Tangan Nahkoda',
+                    icon: Icons.person,
+                    iconColor: Colors.blue,
+                    controller: _captainController,
+                  ),
+                  
+                  const Gap(16),
+                  
+                  // Officer Signature
+                  _buildFormCard(
+                    title: 'Petugas Pemeriksa',
+                    icon: Icons.badge,
+                    iconColor: Colors.teal,
+                    children: [
+                      TextField(
+                        controller: _officerNameController,
+                        decoration: InputDecoration(
+                          labelText: 'Nama Petugas',
+                          prefixIcon: const Icon(Icons.person_pin, size: 20),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                        ),
+                      ),
+                      const Gap(16),
+                      const Text('Tanda Tangan Petugas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                      const Gap(8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Signature(
+                            controller: _officerController,
+                            height: 150,
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const Gap(8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => _officerController.clear(),
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Hapus', style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const Gap(100),
+                ],
               ),
             ),
-            const Gap(12),
-            const Text(
-              'Tanda Tangan Petugas',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-            const Gap(8),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Signature(
-                controller: _officerController,
-                height: 200,
-                backgroundColor: Colors.white,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => _officerController.clear(),
-                  child: const Text('Hapus / Ulangi'),
-                ),
-              ],
-            ),
-
-            const Gap(40),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: FilledButton(
-                onPressed: () async {
-                  if (_captainController.isEmpty || _officerController.isEmpty || _officerNameController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Harap lengkapi Nama Petugas dan kedua Tanda Tangan.')),
-                    );
-                    return;
-                  }
-
-                  // Export signatures to bytes
-                  final captainBytes = await _captainController.toPngBytes();
-                  final officerBytes = await _officerController.toPngBytes();
-
-                  if (captainBytes != null && officerBytes != null) {
-                    provider.setCaptainSignature(captainBytes);
-                    provider.setOfficerSignature(officerBytes);
-                    provider.setOfficerName(_officerNameController.text);
-                    
-                    if (context.mounted) {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const PreviewScreen()));
-                    }
-                  }
-                },
-                child: const Text('Selesai & Preview PDF'),
-              ),
-            ),
-            const Gap(30),
-          ],
+          ),
+        ],
+      ),
+      floatingActionButton: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: FloatingActionButton.extended(
+          onPressed: _submitForm,
+          icon: const Icon(Icons.check_circle),
+          label: const Text('Selesai & Preview PDF', style: TextStyle(fontWeight: FontWeight.w600)),
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
         ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Future<void> _submitForm() async {
+    if (_captainController.isEmpty || _officerController.isEmpty || _officerNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Harap lengkapi Nama Petugas dan kedua Tanda Tangan.'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final provider = Provider.of<InspectionProvider>(context, listen: false);
+    
+    // Export signatures to bytes
+    final captainBytes = await _captainController.toPngBytes();
+    final officerBytes = await _officerController.toPngBytes();
+
+    if (captainBytes != null && officerBytes != null) {
+      provider.setCaptainSignature(captainBytes);
+      provider.setOfficerSignature(officerBytes);
+      provider.setOfficerName(_officerNameController.text);
+      
+      if (context.mounted) {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const PreviewScreen()));
+      }
+    }
+  }
+
+  Widget _buildStepIndicator(int step, String label, bool isPast) {
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: isPast ? Colors.white : Colors.white.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: isPast 
+                ? Icon(Icons.check, color: Theme.of(context).primaryColor, size: 16)
+                : Text(
+                    '$step',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+            ),
+          ),
+          const Gap(4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(isPast ? 1 : 0.6),
+              fontSize: 10,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepLine(bool isCompleted) {
+    return Container(
+      width: 20,
+      height: 2,
+      color: isCompleted ? Colors.white : Colors.white.withOpacity(0.3),
+    );
+  }
+
+  Widget _buildSignatureCard({required String title, required IconData icon, Color? iconColor, required SignatureController controller}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: (iconColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor, size: 20),
+              ),
+              const Gap(12),
+              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const Gap(16),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Signature(
+                controller: controller,
+                height: 150,
+                backgroundColor: Colors.white,
+              ),
+            ),
+          ),
+          const Gap(8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => controller.clear(),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Hapus', style: TextStyle(fontSize: 12)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormCard({required String title, required IconData icon, Color? iconColor, required List<Widget> children}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: (iconColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor, size: 20),
+              ),
+              const Gap(12),
+              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const Gap(16),
+          ...children,
+        ],
       ),
     );
   }
