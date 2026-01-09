@@ -4,6 +4,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import '../providers/inspection_provider.dart';
+import '../widgets/custom_progress_stepper.dart';
 import 'step1c_conclusion.dart';
 
 class Step1BDataKhusus extends StatefulWidget {
@@ -31,31 +32,23 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Data Khusus'),
+        title: const Text('Data Khusus', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
       body: FormBuilder(
         key: _formKey,
         child: Column(
           children: [
             // --- PROGRESS INDICATOR ---
-            Container(
-              color: theme.primaryColor,
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
-              child: Row(
-                children: [
-                  _buildStepIndicator(1, 'Data Kapal', false, true),
-                  _buildStepLine(false),
-                  _buildStepIndicator(2, 'Sanitasi', false, false),
-                  _buildStepLine(false),
-                  _buildStepIndicator(3, 'Kesehatan', false, false),
-                  _buildStepLine(false),
-                  _buildStepIndicator(4, 'TTD', false, false),
-                ],
-              ),
+            // --- PROGRESS INDICATOR ---
+            const CustomProgressStepper(
+              currentStep: 1, // Still step 1 formally
+              totalSteps: 4,
+              stepTitle: 'Kesimpulan & Rekomendasi',
             ),
 
             Expanded(

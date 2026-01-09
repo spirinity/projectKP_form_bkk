@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/inspection_provider.dart';
+import '../widgets/custom_progress_stepper.dart';
 import 'step2_sanitation_form.dart';
 
 class Step1cConclusion extends StatefulWidget {
@@ -32,31 +33,23 @@ class _Step1cConclusionState extends State<Step1cConclusion> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Kesimpulan & Rekomendasi'),
+        title: const Text('Kesimpulan & Rekomendasi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
       body: FormBuilder(
         key: _formKey,
         child: Column(
           children: [
              // Progress Indicator (Step 1: Data Kapal is active)
-            Container(
-              color: theme.primaryColor,
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
-              child: Row(
-                children: [
-                  _buildStepIndicator(1, 'Data Kapal', false, true),
-                  _buildStepLine(false),
-                  _buildStepIndicator(2, 'Sanitasi', false, false),
-                  _buildStepLine(false),
-                  _buildStepIndicator(3, 'Kesehatan', false, false),
-                  _buildStepLine(false),
-                  _buildStepIndicator(4, 'TTD', false, false),
-                ],
-              ),
+             // Progress Indicator (Step 3: Kesehatan is active)
+            const CustomProgressStepper(
+              currentStep: 1,
+              totalSteps: 4,
+              stepTitle: 'Sanitasi Kapal',
             ),
 
             Expanded(
@@ -136,9 +129,9 @@ class _Step1cConclusionState extends State<Step1cConclusion> {
                                       'No Free Pratique',
                                     ];
                                     final labels = {
-                                      'Free Pratique': 'Kapal diberikan FREE PRATIQUE',
-                                      'Free Pratique dengan Syarat': 'Kapal diberikan FREE PRATIQUE dengan Syarat',
-                                      'No Free Pratique': 'Kapal tidak diberikan FREE PRATIQUE',
+                                      'Free Pratique': 'Kapal diberikan Free Pratique',
+                                      'Free Pratique dengan Syarat': 'Kapal diberikan Free Pratique dengan syarat',
+                                      'No Free Pratique': 'Kapal tidak diberikan Free Pratique',
                                     };
                                     return Column(
                                       children: options.map((option) {

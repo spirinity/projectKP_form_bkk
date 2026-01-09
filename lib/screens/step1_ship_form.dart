@@ -4,6 +4,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import '../providers/inspection_provider.dart';
+import '../widgets/custom_progress_stepper.dart';
 import 'step1b_data_khusus.dart';
 
 class Step1ShipForm extends StatefulWidget {
@@ -35,35 +36,22 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
     return Scaffold(
       backgroundColor: Colors.grey[100], // bg-background-light
       appBar: AppBar(
-        title: const Text('Data Umum Kapal'),
+        title: const Text('Data Umum Kapal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
       body: FormBuilder(
         key: _formKey,
         child: Column(
           children: [
-            // Progress Indicator (Unchanged logic, just keeping it here)
-            Container(
-              color: theme.primaryColor,
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      _buildStepIndicator(1, 'Data Kapal', false, true),
-                      _buildStepLine(false),
-                      _buildStepIndicator(2, 'Sanitasi', false, false),
-                      _buildStepLine(false),
-                      _buildStepIndicator(3, 'Kesehatan', false, false),
-                      _buildStepLine(false),
-                      _buildStepIndicator(4, 'TTD', false, false),
-                    ],
-                  ),
-                ],
-              ),
+            // Progress Indicator
+            const CustomProgressStepper(
+              currentStep: 1,
+              totalSteps: 4,
+              stepTitle: 'Data Khusus',
             ),
 
             Expanded(
@@ -473,6 +461,14 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
     String? initialValue,
     String? hintText,
   }) {
+    // Re-map items to ensure they are centered within the dropdown
+    final centeredItems = items.map((item) {
+      return DropdownMenuItem<String>(
+        value: item.value,
+        child: Center(child: item.child),
+      );
+    }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -488,16 +484,17 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
         FormBuilderDropdown<String>(
           name: name,
           initialValue: initialValue,
-          items: items,
+          items: centeredItems,
           isExpanded: true,
+          alignment: AlignmentDirectional.center,
+          // Use widget hint for centering
+          hint: hintText != null 
+              ? Center(child: Text(hintText, style: TextStyle(color: Colors.grey[400], fontSize: 14))) 
+              : null,
           style: const TextStyle(fontSize: 14, color: Colors.black87),
           decoration: InputDecoration(
             isDense: true,
-            hintText: hintText,
-            hintStyle: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 14,
-            ),
+            // Hint is handled by the widget property above
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             filled: true,

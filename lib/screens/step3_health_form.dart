@@ -4,6 +4,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import '../providers/inspection_provider.dart';
+import '../widgets/custom_progress_stepper.dart';
 import 'step4_signature_screen.dart';
 
 class Step3HealthForm extends StatefulWidget {
@@ -28,31 +29,22 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Kesehatan ABK & Penumpang'),
+        title: const Text('Kesehatan ABK & Penumpang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
       body: FormBuilder(
         key: _formKey,
         child: Column(
           children: [
             // Progress Indicator
-            Container(
-              color: theme.primaryColor,
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
-              child: Row(
-                children: [
-                  _buildStepIndicator(1, 'Data Kapal', true, false),
-                  _buildStepLine(true),
-                  _buildStepIndicator(2, 'Sanitasi', true, false),
-                  _buildStepLine(true),
-                  _buildStepIndicator(3, 'Kesehatan', false, true),
-                  _buildStepLine(false),
-                  _buildStepIndicator(4, 'TTD', false, false),
-                ],
-              ),
+            const CustomProgressStepper(
+              currentStep: 3,
+              totalSteps: 4,
+              stepTitle: 'Tanda Tangan',
             ),
 
             Expanded(

@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:signature/signature.dart';
 import '../providers/inspection_provider.dart';
 import 'preview_screen.dart';
+import '../utils/sheet_service.dart';
+import '../widgets/custom_progress_stepper.dart';
 
 class Step4SignatureScreen extends StatefulWidget {
   const Step4SignatureScreen({super.key});
@@ -42,29 +44,21 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Tanda Tangan'),
+        title: const Text('Tanda Tangan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
       body: Column(
         children: [
           // Progress Indicator
-          Container(
-            color: theme.primaryColor,
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
-            child: Row(
-              children: [
-                _buildStepIndicator(1, 'Data Kapal', true, false),
-                _buildStepLine(true),
-                _buildStepIndicator(2, 'Sanitasi', true, false),
-                _buildStepLine(true),
-                _buildStepIndicator(3, 'Kesehatan', true, false),
-                _buildStepLine(true),
-                _buildStepIndicator(4, 'TTD', false, true),
-              ],
-            ),
+          // Progress Indicator
+          const CustomProgressStepper(
+            currentStep: 4,
+            totalSteps: 4,
+            stepTitle: 'Selesai & Preview PDF',
           ),
 
           Expanded(
@@ -157,7 +151,7 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
             'Selesai & Preview PDF',
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
-          backgroundColor: Colors.green,
+          backgroundColor: theme.primaryColor,
           foregroundColor: Colors.white,
         ),
       ),
@@ -196,10 +190,35 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
       provider.setOfficerName(_officerNameController.text);
 
       if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const PreviewScreen()),
+        // 1. Show Loading Dialog
+        showDialog(
+          context: context, 
+          barrierDismissible: false,
+          builder: (ctx) => const Center(child: CircularProgressIndicator())
         );
+
+        // 2. Submit to Google Sheets
+        bool isSuccess = await SheetService.submitInspection(provider.data);
+        
+        if (context.mounted) {
+          Navigator.pop(context); // Close loading
+          
+          if (isSuccess) {
+             ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Data berhasil disimpan ke Google Sheets!'), backgroundColor: Colors.green),
+            );
+          } else {
+             ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Gagal menyimpan ke Google Sheets (Cek Koneksi/URL)'), backgroundColor: Colors.orange),
+            );
+          }
+
+          // 3. Navigate to Preview
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PreviewScreen()),
+          );
+        }
       }
     }
   }
