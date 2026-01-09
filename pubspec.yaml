@@ -45,6 +45,7 @@ dependencies:
   form_builder_validators: ^11.2.0
   gap: ^3.0.1
   google_fonts: ^6.3.2
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
