@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import '../providers/inspection_provider.dart';
-import 'step2_sanitation_form.dart';
+import 'step1c_conclusion.dart';
 
 class Step1BDataKhusus extends StatefulWidget {
   const Step1BDataKhusus({super.key});
@@ -20,11 +21,19 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
     final provider = Provider.of<InspectionProvider>(context, listen: false);
     final theme = Theme.of(context);
 
+    // Common text styles
+    final sectionTitleStyle = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Colors.black87,
+    );
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text('Data Khusus'),
         centerTitle: true,
+        elevation: 0,
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,
       ),
@@ -32,146 +41,719 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
         key: _formKey,
         child: Column(
           children: [
+            // --- PROGRESS INDICATOR ---
             Container(
               color: theme.primaryColor,
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
               child: Row(
                 children: [
-                  _buildStepIndicator(1, 'Data Umum', true, false),
-                  _buildStepLine(true),
-                  _buildStepIndicator(2, 'Data Khusus', false, true),
+                  _buildStepIndicator(1, 'Data Kapal', false, true),
                   _buildStepLine(false),
-                  _buildStepIndicator(3, 'Sanitasi', false, false),
+                  _buildStepIndicator(2, 'Sanitasi', false, false),
                   _buildStepLine(false),
-                  _buildStepIndicator(4, 'Kesehatan', false, false),
+                  _buildStepIndicator(3, 'Kesehatan', false, false),
                   _buildStepLine(false),
-                  _buildStepIndicator(5, 'TTD', false, false),
+                  _buildStepIndicator(4, 'TTD', false, false),
                 ],
               ),
             ),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFormCard(
-                      title: 'A. Pelanggaran Karantina',
-                      icon: Icons.warning_amber,
-                      iconColor: Colors.orange,
+                    // === A. PELANGGARAN KARANTINA ===
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text('A. Pelanggaran Karantina', style: sectionTitleStyle),
+                    ),
+
+                    // 1. Isyarat Karantina
+                    _buildSectionContainer(
                       children: [
-                        _buildRadioGroup(
-                          'quarantineSignal',
-                          '1. Isyarat Karantina',
-                          ['Pasang', 'Tidak Pasang'],
-                          provider.data.quarantineSignal,
-                        ),
-                        const Gap(8),
-                        _buildRadioGroup(
-                          'shipActivity',
-                          '2. Aktivitas di atas kapal',
-                          [
-                            'Ada bongkar muat sebelum Free Pratique',
-                            'Naik/turun orang sebelum Free Pratique',
-                            'Tidak ada aktivitas',
-                          ],
-                          provider.data.shipActivity,
+                        _buildNumberedHeader('1', 'Isyarat Karantina'),
+                        const Gap(16),
+                        FormBuilderField<String>(
+                          name: 'quarantineSignal',
+                          initialValue: provider.data.quarantineSignal,
+                          builder: (field) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: _buildSelectionCard(
+                                    label: 'Pasang',
+                                    icon: Icons.flag,
+                                    iconColor: Colors.blue,
+                                    isSelected: field.value == 'Pasang',
+                                    onTap: () {
+                                      field.didChange('Pasang');
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                                const Gap(12),
+                                Expanded(
+                                  child: _buildSelectionCard(
+                                    label: 'Tidak Pasang',
+                                    icon: Icons.outlined_flag,
+                                    iconColor: Colors.red,
+                                    isSelected: field.value == 'Tidak Pasang',
+                                    onTap: () {
+                                      field.didChange('Tidak Pasang');
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
                     const Gap(16),
-                    _buildFormCard(
-                      title: 'B. Dokumen Kesehatan Kapal',
-                      icon: Icons.description,
-                      iconColor: Colors.blue,
+
+                    // 2. Aktivitas di atas Kapal - FIXED: Using FormBuilderField instead of FormBuilderRadioGroup
+                    _buildSectionContainer(
                       children: [
-                        _buildDocumentItem(
-                          'MDH',
-                          'mdhStatus',
-                          'mdhNote',
-                          ['Sehat', 'Tidak Sehat', 'Tidak Ada'],
-                          provider.data.mdhStatus,
-                          provider.data.mdhNote,
+                        _buildNumberedHeader('2', 'Aktivitas di atas Kapal'),
+                        const Gap(16),
+                        FormBuilderField<String>(
+                          name: 'shipActivity',
+                          initialValue: provider.data.shipActivity,
+                          builder: (FormFieldState<String?> field) {
+                            final options = [
+                              'Ada bongkar muat sebelum penerbitan Free Pratique',
+                              'Naik/turun orang sebelum penerbitan Free Pratique',
+                              'Tidak ada aktivitas di atas kapal',
+                            ];
+                            return Column(
+                              children: options.map((option) {
+                                final isSelected = field.value == option;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      field.didChange(option);
+                                      setState(() {});
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? Colors.green.withOpacity(0.05) : Colors.white,
+                                        border: Border.all(
+                                          color: isSelected ? Colors.green : Colors.grey[200]!,
+                                          width: isSelected ? 1.5 : 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                                            color: isSelected ? Colors.green : Colors.grey[400],
+                                          ),
+                                          const Gap(12),
+                                          Expanded(
+                                            child: Text(
+                                              option,
+                                              style: TextStyle(
+                                                color: isSelected ? Colors.green[900] : Colors.black87,
+                                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          },
                         ),
-                        const Divider(height: 24),
-                        _buildDocumentItem(
-                          'SSCEC / SSCC',
-                          'sscecStatus',
-                          'sscecNote',
-                          ['Berlaku', 'Tidak Berlaku', 'Tidak Ada'],
-                          provider.data.sscecStatus,
-                          provider.data.sscecNote,
-                        ),
-                        const Divider(height: 24),
-                        _buildDocumentItem(
-                          'Crew List / Daftar ABK',
-                          'crewListStatus',
-                          'crewListNote',
-                          ['Ada', 'Tidak Ada'],
-                          provider.data.crewListStatus,
-                          provider.data.crewListNote,
-                        ),
-                        const Divider(height: 24),
-                        _buildDocumentItem(
-                          'Buku Kuning (ICV)',
-                          'icvStatus',
-                          'icvNote',
-                          ['Sesuai', 'Tidak Sesuai', 'Tidak Ada'],
-                          provider.data.icvStatus,
-                          provider.data.icvNote,
-                        ),
-                        const Divider(height: 24),
-                        _buildDocumentItem(
-                          'Voyage Memo',
-                          'voyageMemoStatus',
-                          'voyageMemoNote',
-                          ['Ada', 'Tidak Ada'],
-                          provider.data.voyageMemoStatus,
-                          provider.data.voyageMemoNote,
-                        ),
-                        const Divider(height: 24),
-                        _buildDocumentItem(
-                          'Ship Particular',
-                          'shipParticularStatus',
-                          'shipParticularNote',
-                          ['Ada', 'Tidak Ada'],
-                          provider.data.shipParticularStatus,
-                          provider.data.shipParticularNote,
-                        ),
-                        const Divider(height: 24),
-                        _buildDocumentItem(
-                          'Manifest Cargo',
-                          'manifestCargoStatus',
-                          'manifestCargoNote',
-                          ['Ada', 'Tidak Ada'],
-                          provider.data.manifestCargoStatus,
-                          provider.data.manifestCargoNote,
+                      ],
+                    ),
+                    const Gap(24),
+
+                    // === B. DOKUMEN KESEHATAN KAPAL ===
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text('B. Dokumen Kesehatan Kapal', style: sectionTitleStyle),
+                    ),
+
+                    // 1. MDH
+                    _buildDocumentCardRefined(
+                      index: '1',
+                      title: 'MDH',
+                      subtitle: 'Maritime Declaration of Health',
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMainToggle(
+                                  name: 'mdh_exists',
+                                  value: provider.data.mdhStatus != 'Tidak Ada',
+                                  onChanged: (val) {
+                                    final newStatus = val ? 'Sehat' : 'Tidak Ada';
+                                    _formKey.currentState?.fields['mdhStatus']?.didChange(newStatus);
+                                    setStateSection(() {}); // Local rebuild only
+                                  },
+                                ),
+                                const Gap(16),
+                                const Gap(16),
+                                const Text('STATUS KESEHATAN', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                                const Gap(8),
+                                FormBuilderField<String>(
+                                  name: 'mdhStatus',
+                                  initialValue: provider.data.mdhStatus ?? 'Sehat',
+                                  builder: (field) {
+                                    final isEnabled = _formKey.currentState?.fields['mdh_exists']?.value ?? true;
+                                    return Row(
+                                      children: [
+                                        Expanded(child: _buildStatusButton('Sehat', field, enabled: isEnabled)),
+                                        const Gap(12),
+                                        Expanded(child: _buildStatusButton('Tidak Sehat', field, enabled: isEnabled)),
+                                      ],
+                                    );
+                                  },
+                                ),
+                                const Gap(16),
+                                Builder(
+                                  builder: (context) {
+                                    final exists = _formKey.currentState?.fields['mdh_exists']?.value ?? (provider.data.mdhStatus != 'Tidak Ada');
+                                    return _buildNoteField('mdhNote', provider.data.mdhNote, enabled: !exists);
+                                  }
+                                ),
+                              ],
+                            );
+                          }
                         ),
                       ],
                     ),
                     const Gap(16),
-                    _buildFormCard(
-                      title: 'C. Faktor Risiko PHEIC',
-                      icon: Icons.health_and_safety,
-                      iconColor: Colors.red,
+
+                    // 2. SSCEC / SSCC
+                    _buildDocumentCardRefined(
+                      index: '2',
+                      title: 'SSCEC / SSCC',
+                      subtitle: 'Sanitation Cert.',
                       children: [
-                        _buildRiskItem(
-                          'Faktor Risiko Sanitasi Kapal',
-                          'sanitationRisk',
-                          'sanitationRiskDetail',
-                          provider.data.sanitationRisk,
-                          provider.data.sanitationRiskDetail,
-                        ),
-                        const Gap(12),
-                        _buildRiskItem(
-                          'Faktor Risiko Orang dan P3K',
-                          'healthRisk',
-                          'healthRiskDetail',
-                          provider.data.healthRisk,
-                          provider.data.healthRiskDetail,
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMainToggle(
+                                  name: 'sscec_exists', 
+                                  value: provider.data.sscecStatus != 'Tidak Ada',
+                                  onChanged: (val) {
+                                     final newStatus = val ? 'Berlaku' : 'Tidak Ada';
+                                    _formKey.currentState?.fields['sscecStatus']?.didChange(newStatus);
+                                    setStateSection(() {});
+                                  },
+                                ),
+                                const Gap(16),
+                                const Gap(16),
+                                // Status Buttons
+                                 FormBuilderField<String>(
+                                    name: 'sscecStatus',
+                                    initialValue: provider.data.sscecStatus ?? 'Berlaku',
+                                    builder: (field) {
+                                      final isEnabled = _formKey.currentState?.fields['sscec_exists']?.value ?? true;
+                                      return Row(
+                                        children: [
+                                          Expanded(child: _buildStatusButton('Berlaku', field, enabled: isEnabled)),
+                                          const Gap(12),
+                                          Expanded(child: _buildStatusButton('Tidak Berlaku', field, enabled: isEnabled)),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  const Gap(16),
+                                  Builder(builder: (context) {
+                                     final isEnabled = _formKey.currentState?.fields['sscec_exists']?.value ?? true;
+                                     return Column(children: [
+                                        _buildStyledTextField('sscecPlace', 'Tempat Terbit', provider.data.sscecPlace, 'Masukkan Pelabuhan', enabled: isEnabled),
+                                        const Gap(12),
+                                        Row(
+                                          children: [
+                                            Expanded(child: _buildStyledDateField('sscecDate', 'Tanggal Terbit', provider.data.sscecDate, enabled: isEnabled)),
+                                            const Gap(12),
+                                            Expanded(child: _buildStyledDateField('sscecExpiry', 'Berlaku Sampai', provider.data.sscecExpiry, enabled: isEnabled)),
+                                          ],
+                                        ),
+                                     ]);
+                                  }),
+                                   const Gap(16),
+                                  Builder(
+                                    builder: (context) {
+                                      final exists = _formKey.currentState?.fields['sscec_exists']?.value ?? (provider.data.sscecStatus != 'Tidak Ada');
+                                      return _buildNoteField('sscecNote', provider.data.sscecNote, enabled: !exists);
+                                    }
+                                  ),
+                              ]
+                            );
+                          }
                         ),
                       ],
                     ),
+                    const Gap(16),
+
+                    // 3. Crew List
+                     _buildDocumentCardRefined(
+                      index: '3',
+                      title: 'Crew List / Daftar ABK',
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMainToggle(
+                                  name: 'crewListStatus',
+                                  value: provider.data.crewListStatus == 'Ada',
+                                  onChanged: (val) {
+                                     _formKey.currentState?.fields['crewListStatus_real']?.didChange(val ? 'Ada' : 'Tidak Ada');
+                                     setStateSection((){});
+                                  },
+                                ),
+                                Visibility(
+                                  visible: false,
+                                  child: FormBuilderTextField(name: 'crewListStatus_real', initialValue: provider.data.crewListStatus ?? 'Ada'),
+                                ),
+
+                                const Gap(16),
+                                Builder(
+                                  builder: (context) {
+                                    final exists = _formKey.currentState?.fields['crewListStatus']?.value ?? (provider.data.crewListStatus == 'Ada');
+                                    return _buildNoteField('crewListNote', provider.data.crewListNote, enabled: !exists);
+                                  }
+                                ),
+                              ]
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                    const Gap(16),
+
+                    // 4. Buku Kuning (ICV)
+                    _buildDocumentCardRefined(
+                      index: '4',
+                      title: 'Buku Kuning (ICV)',
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                 _buildMainToggle(
+                                  name: 'icv_exists',
+                                  value: provider.data.icvStatus != 'Tidak Ada',
+                                  onChanged: (val) {
+                                    final newStatus = val ? 'Sesuai' : 'Tidak Ada';
+                                    _formKey.currentState?.fields['icvStatus']?.didChange(newStatus);
+                                    setStateSection((){});
+                                  },
+                                ),
+                                const Gap(16),
+                                const Gap(16),
+                                // Status Buttons
+                                   FormBuilderField<String>(
+                                    name: 'icvStatus',
+                                    initialValue: provider.data.icvStatus ?? 'Sesuai',
+                                    builder: (field) {
+                                      final isEnabled = _formKey.currentState?.fields['icv_exists']?.value ?? true;
+                                      return Row(
+                                        children: [
+                                          Expanded(child: _buildStatusButton('Sesuai', field, enabled: isEnabled)),
+                                          const Gap(12),
+                                          Expanded(child: _buildStatusButton('Tidak Sesuai', field, enabled: isEnabled)),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  const Gap(16),
+                                   Builder(
+                                    builder: (context) {
+                                      final exists = _formKey.currentState?.fields['icv_exists']?.value ?? (provider.data.icvStatus != 'Tidak Ada');
+                                      return _buildNoteField('icvNote', provider.data.icvNote, enabled: !exists);
+                                    }
+                                  ),
+                              ]
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                    const Gap(16),
+
+                    // 5. P3K Kapal
+                    _buildDocumentCardRefined(
+                      index: '5',
+                      title: 'P3K Kapal',
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMainToggle(
+                                  name: 'p3k_exists', 
+                                  value: provider.data.p3kStatus != 'Tidak Ada',
+                                  onChanged: (val) {
+                                     final newStatus = val ? 'Berlaku' : 'Tidak Ada';
+                                    _formKey.currentState?.fields['p3kStatus']?.didChange(newStatus);
+                                    setStateSection(() {});
+                                  },
+                                ),
+                                const Gap(16),
+                                const Gap(16),
+                                // Status Buttons
+                                   FormBuilderField<String>(
+                                    name: 'p3kStatus',
+                                    initialValue: provider.data.p3kStatus ?? 'Berlaku',
+                                    builder: (field) {
+                                      final isEnabled = _formKey.currentState?.fields['p3k_exists']?.value ?? true;
+                                      return Row(
+                                        children: [
+                                          Expanded(child: _buildStatusButton('Berlaku', field, enabled: isEnabled)),
+                                          const Gap(12),
+                                          Expanded(child: _buildStatusButton('Tidak Berlaku', field, enabled: isEnabled)),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  const Gap(16),
+                                  Builder(builder: (context) {
+                                     final isEnabled = _formKey.currentState?.fields['p3k_exists']?.value ?? true;
+                                     return Column(children: [
+                                        _buildStyledTextField('p3kPlace', 'Tempat Terbit', provider.data.p3kPlace, 'Masukkan Pelabuhan', enabled: isEnabled),
+                                        const Gap(12),
+                                        Row(
+                                          children: [
+                                            Expanded(child: _buildStyledDateField('p3kDate', 'Tanggal Terbit', provider.data.p3kDate, enabled: isEnabled)),
+                                            const Gap(12),
+                                            Expanded(child: _buildStyledDateField('p3kExpiry', 'Berlaku Sampai', provider.data.p3kExpiry, enabled: isEnabled)),
+                                          ],
+                                        ),
+                                     ]);
+                                  }),
+                                   const Gap(16),
+                                  Builder(
+                                    builder: (context) {
+                                      final exists = _formKey.currentState?.fields['p3k_exists']?.value ?? (provider.data.p3kStatus != 'Tidak Ada');
+                                      return _buildNoteField('p3kNote', provider.data.p3kNote, enabled: !exists);
+                                    }
+                                  ),
+                              ]
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                    const Gap(16),
+
+                    // 6. Buku Kesehatan Kapal
+                    _buildDocumentCardRefined(
+                      index: '6',
+                      title: 'Buku Kesehatan Kapal',
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                 _buildMainToggle(
+                                  name: 'healthBook_exists',
+                                  value: provider.data.healthBookStatus != 'Tidak Ada',
+                                  onChanged: (val) {
+                                    final newStatus = val ? 'Sesuai' : 'Tidak Ada';
+                                    _formKey.currentState?.fields['healthBookStatus']?.didChange(newStatus);
+                                    setStateSection((){});
+                                  },
+                                ),
+                                const Gap(16),
+                                const Gap(16),
+                                // Status Buttons
+                                   FormBuilderField<String>(
+                                    name: 'healthBookStatus',
+                                    initialValue: provider.data.healthBookStatus ?? 'Sesuai',
+                                    builder: (field) {
+                                      final isEnabled = _formKey.currentState?.fields['healthBook_exists']?.value ?? true;
+                                      return Row(
+                                        children: [
+                                          Expanded(child: _buildStatusButton('Sesuai', field, enabled: isEnabled)),
+                                          const Gap(12),
+                                          Expanded(child: _buildStatusButton('Tidak Sesuai', field, enabled: isEnabled)),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  const Gap(16),
+                                  Builder(builder: (context) {
+                                     final isEnabled = _formKey.currentState?.fields['healthBook_exists']?.value ?? true;
+                                     return Column(children: [
+                                        _buildStyledTextField('healthBookPlace', 'Tempat Terbit', provider.data.healthBookPlace, 'Masukkan Tempat', enabled: isEnabled),
+                                        const Gap(12),
+                                        _buildStyledDateField('healthBookDate', 'Tanggal Terbit', provider.data.healthBookDate, enabled: isEnabled),
+                                     ]);
+                                  }),
+                                   const Gap(16),
+                                  Builder(
+                                    builder: (context) {
+                                      final exists = _formKey.currentState?.fields['healthBook_exists']?.value ?? (provider.data.healthBookStatus != 'Tidak Ada');
+                                      return _buildNoteField('healthBookNote', provider.data.healthBookNote, enabled: !exists);
+                                    }
+                                  ),
+                              ]
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                    const Gap(16),
+
+                    // 7. Voyage Memo
+                     _buildDocumentCardRefined(
+                      index: '7',
+                      title: 'Voyage Memo',
+                      children: [
+                         StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMainToggle(
+                                  name: 'voyageMemoStatus_toggle',
+                                  value: provider.data.voyageMemoStatus == 'Ada',
+                                  onChanged: (val) {
+                                     _formKey.currentState?.fields['voyageMemoStatus']?.didChange(val ? 'Ada' : 'Tidak Ada');
+                                     setStateSection((){});
+                                  },
+                                ),
+                                Visibility(visible: false, child: FormBuilderTextField(name: 'voyageMemoStatus', initialValue: provider.data.voyageMemoStatus ?? 'Ada')),
+                                const Gap(16),
+                                Builder(
+                                  builder: (context) {
+                                    final exists = _formKey.currentState?.fields['voyageMemoStatus_toggle']?.value ?? (provider.data.voyageMemoStatus == 'Ada');
+                                    return _buildNoteField('voyageMemoNote', provider.data.voyageMemoNote, enabled: !exists);
+                                  }
+                                ),
+                              ]
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                     const Gap(16),
+                     
+                     // 8. Ship Particular
+                     _buildDocumentCardRefined(
+                      index: '8',
+                      title: 'Ship Particular',
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMainToggle(
+                                  name: 'shipParticularStatus_toggle',
+                                  value: provider.data.shipParticularStatus == 'Ada',
+                                  onChanged: (val) {
+                                     _formKey.currentState?.fields['shipParticularStatus']?.didChange(val ? 'Ada' : 'Tidak Ada');
+                                     setStateSection((){});
+                                  },
+                                ),
+                                Visibility(visible: false, child: FormBuilderTextField(name: 'shipParticularStatus', initialValue: provider.data.shipParticularStatus ?? 'Ada')),
+                                const Gap(16),
+                                Builder(
+                                  builder: (context) {
+                                    final exists = _formKey.currentState?.fields['shipParticularStatus_toggle']?.value ?? (provider.data.shipParticularStatus == 'Ada');
+                                    return _buildNoteField('shipParticularNote', provider.data.shipParticularNote, enabled: !exists);
+                                  }
+                                ),
+                              ]
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                    const Gap(16),
+
+                    // 9. Manifest Cargo
+                     _buildDocumentCardRefined(
+                      index: '9',
+                      title: 'Manifest Cargo',
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMainToggle(
+                                  name: 'manifestCargoStatus_toggle',
+                                  value: provider.data.manifestCargoStatus == 'Ada',
+                                  onChanged: (val) {
+                                     _formKey.currentState?.fields['manifestCargoStatus']?.didChange(val ? 'Ada' : 'Tidak Ada');
+                                     setStateSection((){});
+                                  },
+                                ),
+                                 Visibility(visible: false, child: FormBuilderTextField(name: 'manifestCargoStatus', initialValue: provider.data.manifestCargoStatus ?? 'Ada')),
+                                const Gap(16),
+                                Builder(
+                                  builder: (context) {
+                                    final exists = _formKey.currentState?.fields['manifestCargoStatus_toggle']?.value ?? (provider.data.manifestCargoStatus == 'Ada');
+                                    return _buildNoteField('manifestCargoNote', provider.data.manifestCargoNote, enabled: !exists);
+                                  }
+                                ),
+                              ]
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                    const Gap(32),
+                    
+                    // C. Faktor Risiko PHEIC
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text('C. Faktor Risiko PHEIC', style: sectionTitleStyle),
+                    ),
+                    _buildSectionContainer(
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                 _buildNumberedHeader('1', 'Sanitasi Kapal'),
+                                 const Gap(16),
+                                 FormBuilderField<bool>(
+                                  name: 'sanitationRisk',
+                                  initialValue: provider.data.sanitationRisk,
+                                  builder: (field) {
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _buildSelectionCard(
+                                                label: 'Ada',
+                                                icon: Icons.warning_amber_rounded,
+                                                iconColor: Colors.orange,
+                                                isSelected: field.value == true,
+                                                onTap: () {
+                                                  field.didChange(true);
+                                                  setStateSection(() {});
+                                                },
+                                              ),
+                                            ),
+                                            const Gap(12),
+                                            Expanded(
+                                              child: _buildSelectionCard(
+                                                label: 'Tidak ada',
+                                                icon: Icons.check_circle_outline,
+                                                iconColor: Colors.green,
+                                                isSelected: field.value == false,
+                                                onTap: () {
+                                                  field.didChange(false);
+                                                  setStateSection(() {});
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Gap(16),
+                                        // Detail Text Field
+                                        _buildStyledTextField(
+                                          'sanitationRiskDetail', 
+                                          'Detail Temuan Sanitasi', 
+                                          provider.data.sanitationRiskDetail, 
+                                          'Jelaskan temuan risiko...',
+                                          enabled: field.value == true,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ]
+                            );
+                          }
+                        ),
+                      ]
+                    ),
+                    const Gap(16),
+                    _buildSectionContainer(
+                      children: [
+                        StatefulBuilder(
+                          builder: (context, setStateSection) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                 _buildNumberedHeader('2', 'Risiko Orang & P3K'),
+                                 const Gap(16),
+                                FormBuilderField<bool>(
+                                  name: 'healthRisk',
+                                  initialValue: provider.data.healthRisk,
+                                  builder: (field) {
+                                    return Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _buildSelectionCard(
+                                                label: 'Ada',
+                                                icon: Icons.medical_services_outlined,
+                                                iconColor: Colors.red,
+                                                isSelected: field.value == true,
+                                                onTap: () {
+                                                  field.didChange(true);
+                                                  setStateSection(() {});
+                                                },
+                                              ),
+                                            ),
+                                            const Gap(12),
+                                            Expanded(
+                                              child: _buildSelectionCard(
+                                                label: 'Tidak ada',
+                                                icon: Icons.check_circle_outline,
+                                                iconColor: Colors.green,
+                                                isSelected: field.value == false,
+                                                onTap: () {
+                                                  field.didChange(false);
+                                                  setStateSection(() {});
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Gap(16),
+                                        // Detail Text Field
+                                        _buildStyledTextField(
+                                          'healthRiskDetail', 
+                                          'Detail Temuan Kesehatan', 
+                                          provider.data.healthRiskDetail, 
+                                          'Jelaskan temuan risiko...',
+                                          enabled: field.value == true,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ]
+                            );
+                          }
+                        ),
+                      ]
+                    ),
+                    
                     const Gap(100),
                   ],
                 ),
@@ -180,331 +762,402 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _submitForm,
-        label: const Text('Lanjut ke Sanitasi'),
-        icon: const Icon(Icons.arrow_forward),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-      ),
-    );
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState?.saveAndValidate() ?? false) {
-      final values = _formKey.currentState!.value;
-      final provider = Provider.of<InspectionProvider>(context, listen: false);
-
-      provider.updateQuarantineViolations(
-        signal: values['quarantineSignal'],
-        activity: values['shipActivity'],
-      );
-
-      provider.updateDocumentMDH(
-        status: values['mdhStatus'],
-        note: values['mdhNote'],
-      );
-      provider.updateDocumentSSCEC(
-        status: values['sscecStatus'],
-        note: values['sscecNote'],
-      );
-      provider.updateDocumentCrewList(
-        status: values['crewListStatus'],
-        note: values['crewListNote'],
-      );
-      provider.updateDocumentICV(
-        status: values['icvStatus'],
-        note: values['icvNote'],
-      );
-
-      provider.updateOtherDocuments(
-        voyageStatus: values['voyageMemoStatus'],
-        voyageNote: values['voyageMemoNote'],
-        shipPartStatus: values['shipParticularStatus'],
-        shipPartNote: values['shipParticularNote'],
-        manifestStatus: values['manifestCargoStatus'],
-        manifestNote: values['manifestCargoNote'],
-      );
-
-      provider.updateRisks(
-        sanitation: values['sanitationRisk'] ?? false,
-        sDetail: values['sanitationRiskDetail'],
-        health: values['healthRisk'] ?? false,
-        hDetail: values['healthRiskDetail'],
-      );
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const Step2SanitationForm()),
-      );
-    }
-  }
-
-  Widget _buildStepIndicator(
-    int step,
-    String label,
-    bool isCompleted,
-    bool isCurrent,
-  ) {
-    Color bgColor = (isCompleted || isCurrent)
-        ? Colors.white
-        : Colors.white.withOpacity(0.3);
-    Color contentColor = Theme.of(context).primaryColor;
-    Color labelColor = (isCompleted || isCurrent)
-        ? Colors.white
-        : Colors.white.withOpacity(0.6);
-
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Center(
-              child: isCompleted
-                  ? Icon(Icons.check, color: contentColor, size: 16)
-                  : Text(
-                      '$step',
-                      style: TextStyle(
-                        color: contentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-            ),
+     floatingActionButton: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: FloatingActionButton.extended(
+          onPressed: _submitForm,
+          icon: const Icon(Icons.arrow_forward),
+          label: const Text(
+            'Lanjut ke Kesimpulan dan Rekomendasi',
+            style: TextStyle(fontWeight: FontWeight.w600),
           ),
-          const Gap(4),
-          SizedBox(
-            height: 24,
-            child: Text(
-              label,
-              style: TextStyle(color: labelColor, fontSize: 10),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
+          backgroundColor: theme.primaryColor,
+          foregroundColor: Colors.white,
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _buildStepLine(bool isCompleted) {
-    return Container(
-      width: 20,
-      height: 2,
-      color: isCompleted ? Colors.white : Colors.white.withOpacity(0.3),
-    );
-  }
+  // ==================== WIDGETS ====================
 
-  Widget _buildFormCard({
-    required String title,
-    required IconData icon,
-    Color? iconColor,
-    required List<Widget> children,
-  }) {
+  Widget _buildSectionContainer({required List<Widget> children}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (iconColor ?? Theme.of(context).primaryColor)
-                      .withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? Theme.of(context).primaryColor,
-                  size: 20,
-                ),
-              ),
-              const Gap(12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const Gap(16),
-          ...children,
-        ],
-      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
     );
   }
 
-  Widget _buildCustomChipField(
-    String name,
-    List<String> options,
-    String? initialValue,
-  ) {
-    return FormBuilderField<String>(
-      name: name,
-      initialValue: initialValue,
-      builder: (FormFieldState<String> field) {
-        return InputDecorator(
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            filled: false,
-            fillColor: Colors.transparent,
-            errorText: field.errorText,
-            contentPadding: EdgeInsets.zero,
-          ),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: options.map((option) {
-              final selected = field.value == option;
-              return ChoiceChip(
-                label: Text(
-                  option,
-                  style: TextStyle(
-                    color: selected ? Colors.white : Colors.black87,
-                    fontSize: 12,
-                  ),
-                ),
-                selected: selected,
-                onSelected: (val) {
-                  if (val) field.didChange(option);
-                },
-                selectedColor: Theme.of(context).primaryColor,
-                backgroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                labelStyle: TextStyle(
-                  color: selected ? Colors.white : Colors.black,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                showCheckmark: false,
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRadioGroup(
-    String name,
-    String label,
-    List<String> options,
-    String? initialValue,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildNumberedHeader(String number, String title) {
+    return Row(
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+        Container(
+          width: 24, height: 24,
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Text(number, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
         ),
-        const Gap(8),
-        _buildCustomChipField(name, options, initialValue),
+        const Gap(10),
+        Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
       ],
     );
   }
 
-  Widget _buildDocumentItem(
-    String title,
-    String statusName,
-    String noteName,
-    List<String> options,
-    String? status,
-    String? note,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-        ),
-        const Gap(8),
-        _buildCustomChipField(statusName, options, status),
-        const Gap(8),
-        FormBuilderTextField(
-          name: noteName,
-          initialValue: note,
-          decoration: InputDecoration(
-            hintText: 'Keterangan (bila diperlukan)',
-            hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
-            isDense: true,
+  Widget _buildSelectionCard({
+    required String label,
+    required IconData icon,
+    required Color iconColor,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 80,
+        decoration: BoxDecoration(
+          color: isSelected ? iconColor.withOpacity(0.08) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? iconColor : Colors.grey[200]!,
+            width: isSelected ? 1.5 : 1,
           ),
-          style: const TextStyle(fontSize: 13),
         ),
-      ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+             Icon(icon, color: isSelected ? iconColor : Colors.grey[400]),
+             const Gap(8),
+             Text(
+               label, 
+               style: TextStyle(
+                 fontSize: 13, 
+                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                 color: isSelected ? iconColor : Colors.black87
+               )
+             ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildRiskItem(
-    String title,
-    String checkName,
-    String detailName,
-    bool? checked,
-    String? detail,
-  ) {
+  Widget _buildDocumentCardRefined({
+    required String index,
+    required String title,
+    String? subtitle,
+    required List<Widget> children,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FormBuilderCheckbox(
-            name: checkName,
-            initialValue: checked ?? false,
-            title: Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
-            ),
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            color: const Color(0xFFE0F7FA),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('$index. $title', style: TextStyle(color: const Color(0xFF006064), fontWeight: FontWeight.bold, fontSize: 15)),
+                if (subtitle != null)
+                  Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 10, fontFamily: 'monospace')),
+              ],
             ),
           ),
-          FormBuilderTextField(
-            name: detailName,
-            initialValue: detail,
-            decoration: InputDecoration(
-              hintText: 'Detail risiko (jika ada)',
-              hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              isDense: true,
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
             ),
-            style: const TextStyle(fontSize: 13),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildMainToggle({
+    required String name,
+    required bool value, // acting as initialValue
+    required ValueChanged<bool> onChanged,
+  }) {
+    return FormBuilderField<bool>(
+      name: name,
+      initialValue: value,
+      builder: (FormFieldState<bool> field) {
+        return Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: LayoutBuilder(builder: (context, constraints) {
+            return Row(
+              children: [
+                _buildTogglePart('Ada', true, field.value ?? true, (val) {
+                  field.didChange(val);
+                  onChanged(val);
+                }),
+                _buildTogglePart('Tidak Ada', false, field.value ?? true, (val) {
+                  field.didChange(val);
+                  onChanged(val);
+                }),
+              ],
+            );
+          }),
+        );
+      },
+    );
+  }
+
+  Widget _buildTogglePart(String label, bool isLeft, bool currentValue, ValueChanged<bool> onChanged) {
+    final bool isActive = isLeft ? currentValue : !currentValue;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onChanged(isLeft),
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isActive ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: isActive ? [ BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 2) ] : null,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Theme.of(context).primaryColor : Colors.grey[600],
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusButton(String label, FormFieldState<String> field,
+      {bool enabled = true}) {
+    final isSelected = field.value == label;
+    final primaryColor = Theme.of(context).primaryColor;
+    
+    // Visual style for disabled state
+    final Color bgColor = enabled 
+        ? (isSelected ? primaryColor.withOpacity(0.08) : Colors.white)
+        : Colors.grey[200]!;
+    final Color borderColor = enabled
+        ? (isSelected ? primaryColor : Colors.grey[200]!)
+        : Colors.transparent;
+    final Color textColor = enabled
+        ? (isSelected ? primaryColor : Colors.grey[600]!)
+        : Colors.grey[400]!;
+
+    return GestureDetector(
+      onTap: enabled
+          ? () {
+              field.didChange(label);
+              setState(() {});
+            }
+          : null,
+      child: Container(
+        height: 48,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: borderColor,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildStyledTextField(String name, String label, String? initialValue, String hint, {bool enabled = true}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 12, color: enabled ? Colors.grey : Colors.grey[300], fontWeight: FontWeight.bold)),
+        const Gap(6),
+        FormBuilderTextField(
+          name: name,
+          initialValue: initialValue,
+          enabled: enabled,
+          style: const TextStyle(fontSize: 14),
+          decoration: InputDecoration(
+            hintText: hint,
+            isDense: true,
+            filled: !enabled,
+            fillColor: !enabled ? Colors.grey[100] : null,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+            disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
+          ),
+        )
+      ],
+    );
+  }
+  
+  Widget _buildStyledDateField(String name, String label, DateTime? initialValue, {bool enabled = true}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 12, color: enabled ? Colors.grey : Colors.grey[300], fontWeight: FontWeight.bold)),
+        const Gap(6),
+        FormBuilderDateTimePicker(
+          name: name,
+          initialValue: initialValue,
+          inputType: InputType.date,
+          enabled: enabled,
+          style: const TextStyle(fontSize: 14),
+          fieldHintText: 'mm/dd/yyyy',
+          decoration: InputDecoration(
+             prefixIcon: Icon(Icons.calendar_today, size: 16, color: enabled ? Colors.grey : Colors.grey[300]),
+             isDense: true,
+             filled: !enabled,
+             fillColor: !enabled ? Colors.grey[100] : null,
+             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
+             disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoteField(String name, String? initialValue, {bool enabled = true}) {
+      return FormBuilderTextField(
+          name: name,
+          initialValue: initialValue,
+          enabled: enabled,
+          decoration: InputDecoration(
+            hintText: 'Bila tidak ada, alasannya...',
+            isDense: true,
+            filled: !enabled,
+            fillColor: !enabled ? Colors.grey[100] : null,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)), 
+            disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[200]!)), 
+          ),
+          style: const TextStyle(fontSize: 13),
+      );
+  }
+
+  Widget _buildSegmentedButtonBool(
+      String name, Map<String, bool> options, bool? initialValue) {
+    return FormBuilderField<bool>(
+      name: name,
+      initialValue: initialValue,
+      builder: (FormFieldState<bool> field) {
+        return SegmentedButton<bool>(
+          segments: options.entries
+              .map((e) => ButtonSegment<bool>(
+                    value: e.value,
+                    label: Text(e.key, style: const TextStyle(fontSize: 12)),
+                  ))
+              .toList(),
+          selected: field.value != null ? {field.value!} : {},
+          emptySelectionAllowed: true,
+          onSelectionChanged: (Set<bool> newSelection) {
+            if(newSelection.isNotEmpty) {
+                 field.didChange(newSelection.first);
+                 setState((){});
+            }
+          },
+          showSelectedIcon: false,
+          style: ButtonStyle(
+            visualDensity: VisualDensity.compact,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildStepIndicator(int step, String label, bool isCompleted, bool isCurrent) {
+    Color contentColor = Theme.of(context).primaryColor;
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            width: 28, height: 28,
+            decoration: BoxDecoration(color: (isCompleted||isCurrent)?Colors.white:Colors.white.withOpacity(0.3), shape: BoxShape.circle),
+            child: Center(child: Text('$step', style: TextStyle(color: contentColor, fontWeight: FontWeight.bold, fontSize: 12))),
+          ),
+          const Gap(4),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 10), maxLines: 1),
+        ],
+      ),
+    );
+  }
+  Widget _buildStepLine(bool isCompleted) {
+    return Container(width: 20, height: 2, color: isCompleted?Colors.white:Colors.white.withOpacity(0.3));
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+       final values = _formKey.currentState!.value;
+       final provider = Provider.of<InspectionProvider>(context, listen: false);
+
+       provider.updateQuarantineViolations(signal: values['quarantineSignal'], activity: values['shipActivity']);
+       provider.updateDocumentMDH(status: values['mdhStatus'], note: values['mdhNote']);
+       provider.updateDocumentSSCEC(
+          status: values['sscecStatus'], note: values['sscecNote'], 
+          place: values['sscecPlace'], date: values['sscecDate'], expiry: values['sscecExpiry']
+       );
+       provider.updateDocumentCrewList(status: values['crewListStatus_real'], note: values['crewListNote']);
+       provider.updateDocumentICV(status: values['icvStatus'], note: values['icvNote']);
+       provider.updateDocumentP3K(
+          status: values['p3kStatus'], note: values['p3kNote'],
+          place: values['p3kPlace'], date: values['p3kDate'], expiry: values['p3kExpiry']
+       ); 
+       provider.updateDocumentHealthBook(
+          status: values['healthBookStatus'], note: values['healthBookNote'],
+          place: values['healthBookPlace'], date: values['healthBookDate'],
+       );
+       provider.updateOtherDocuments(
+        voyageStatus: values['voyageMemoStatus_toggle'] == true ? 'Ada' : 'Tidak Ada',
+        voyageNote: values['voyageMemoNote'],
+        shipPartStatus: values['shipParticularStatus_toggle'] == true ? 'Ada' : 'Tidak Ada',
+        shipPartNote: values['shipParticularNote'],
+        manifestStatus: values['manifestCargoStatus_toggle'] == true ? 'Ada' : 'Tidak Ada',
+        manifestNote: values['manifestCargoNote'],
+      );
+
+      provider.updateRisks(
+        sanitation: values['sanitationRisk'],
+        sDetail: values['sanitationRiskDetail'],
+        health: values['healthRisk'],
+        hDetail: values['healthRiskDetail'],
+      );
+
+       Navigator.push(context, MaterialPageRoute(builder: (_) => const Step1cConclusion()));
+    }
   }
 }
