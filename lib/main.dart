@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => InspectionProvider()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Karantina Kesehatan Balikpapan',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF005c4b)), // Greenish medical/safety

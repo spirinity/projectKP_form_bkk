@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:signature/signature.dart';
 import '../providers/inspection_provider.dart';
 import 'preview_screen.dart';
-import '../utils/sheet_service.dart';
+import '../services/sheet_service.dart';
 import '../widgets/custom_progress_stepper.dart';
 
 class Step4SignatureScreen extends StatefulWidget {

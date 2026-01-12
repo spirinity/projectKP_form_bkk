@@ -17,11 +17,11 @@ class Step1ShipForm extends StatefulWidget {
 class _Step1ShipFormState extends State<Step1ShipForm> {
   final _formKey = GlobalKey<FormBuilderState>();
 
-  static const List<String> _countryList = [
-    'Indonesia', 'Panama', 'Singapore', 'Malaysia', 'Liberia',
-    'Marshall Islands', 'Vietnam', 'Thailand', 'Philippines',
-    'China', 'Hong Kong', 'Japan'
-  ];
+  static const Map<String, String> _countryFlags = {
+    'Indonesia': '🇮🇩', 'Panama': '🇵🇦', 'Singapore': '🇸🇬', 'Malaysia': '🇲🇾',
+    'Liberia': '🇱🇷', 'Marshall Islands': '🇲🇭', 'Vietnam': '🇻🇳', 'Thailand': '🇹🇭',
+    'Philippines': '🇵🇭', 'China': '🇨🇳', 'Hong Kong': '🇭🇰', 'Japan': '🇯🇵'
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +84,22 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                                 label: 'Bendera',
                                 initialValue: provider.data.flag,
                                 hintText: 'Negara',
-                                items: _countryList
+                                items: _countryFlags.keys
                                     .map((country) => DropdownMenuItem(
                                           value: country,
-                                          child: Text(country),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(_countryFlags[country]!, style: const TextStyle(fontSize: 20)),
+                                              const Gap(8),
+                                              Flexible(
+                                                child: Text(
+                                                  country,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ))
                                     .toList(),
                               ),
