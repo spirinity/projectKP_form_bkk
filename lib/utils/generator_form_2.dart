@@ -34,7 +34,7 @@ class PdfGenerator {
     const double col1X = 285; // Memenuhi Syarat (kolom sempit)
     const double col2X = 368; // Tidak Memenuhi Syarat (kolom medium)
     const double col3X = 454; // Tampak Tanda-tanda (kolom medium-lebar)
-    const double col4X = 510; // Tidak Tampak (kolom paling lebar)
+    const double col4X = 525; // Tidak Tampak (kolom paling lebar)
 
     // Posisi Y untuk setiap baris (dari atas)
     // Baris dimulai setelah header tabel
@@ -101,7 +101,7 @@ class PdfGenerator {
     const double captainBoxHeight = 30; // Tinggi kotak
 
     // Area tanda tangan Pemeriksa (kanan)
-    const double officerBoxX = 383; // X awal kotak
+    const double officerBoxX = 397; // X awal kotak
     const double officerBoxY = 604; // Y awal kotak
     const double officerBoxWidth = 150; // Lebar kotak
     const double officerBoxHeight = 30; // Tinggi kotak

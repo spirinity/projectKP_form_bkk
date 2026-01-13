@@ -275,14 +275,14 @@ class PdfGeneratorForm1 {
     const double risikoTidakAdaX = 530; // "Tidak ada" checkbox on right side (+20)
     
     // 1. Faktor Risiko Sanitasi Kapal
-    if (data.sanitationRisk) {
+    if (data.sanitationRisk == true) {
       overlays.add(_buildCheckmark(risikoAdaX, risikoY));
     } else {
       overlays.add(_buildCheckmark(risikoTidakAdaX, risikoY));
     }
     
     // 2. Faktor Risiko Orang dan P3K
-    if (data.healthRisk) {
+    if (data.healthRisk == true) {
       overlays.add(_buildCheckmark(risikoAdaX, risikoY + 11));
     } else {
       overlays.add(_buildCheckmark(risikoTidakAdaX, risikoY + 11));
@@ -295,7 +295,7 @@ class PdfGeneratorForm1 {
     const double kesimpulanBebasX = 160;      // Kapal Bebas PHEIC (+20)
     const double kesimpulanTidakBebasX = 260; // Tidak Bebas PHEIC (+20)
     
-    if (data.isPHEICFree) {
+    if (data.isPHEICFree == true) {
       overlays.add(_buildCheckmark(kesimpulanBebasX, kesimpulanY));
     } else {
       overlays.add(_buildCheckmark(kesimpulanTidakBebasX, kesimpulanY));
@@ -334,7 +334,7 @@ class PdfGeneratorForm1 {
     const double rekB_TanggalX = 350; // +20
     const double rekB_JamX = 440; // +20
     
-    if (data.sibGiven) {
+    if (data.sibGiven == true) {
       overlays.add(_buildCheckmark(rekB_X, rekB_Y));
       if (data.sibNumber != null) {
         overlays.add(_buildText(rekB_NoX, rekB_Y, data.sibNumber!, fontSize: 8));
