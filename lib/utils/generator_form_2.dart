@@ -34,7 +34,7 @@ class PdfGenerator {
     const double col1X = 285; // Memenuhi Syarat (kolom sempit)
     const double col2X = 368; // Tidak Memenuhi Syarat (kolom medium)
     const double col3X = 454; // Tampak Tanda-tanda (kolom medium-lebar)
-    const double col4X = 525; // Tidak Tampak (kolom paling lebar)
+    const double col4X = 527; // Tidak Tampak (kolom paling lebar)
 
     // Posisi Y untuk setiap baris (dari atas)
     // Baris dimulai setelah header tabel
