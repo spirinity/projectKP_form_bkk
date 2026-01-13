@@ -16,7 +16,7 @@ Saat ini aplikasi menggunakan mode "Generated Layout" (re-kreasi) dengan placeho
     - Simpan gambar tersebut di folder: `d:\PROJEK\PROJEK KP\assets\images\`
 
 2.  **Edit Code**:
-    - Buka file `lib/utils/pdf_generator.dart`.
+    - Buka file `lib/utils/generator_form_2.dart`.
     - Cari bagian comment `// TODO: UNCOMMENT THIS BLOCK`.
     - Uncomment code tersebut dan sesuaikan path gambarnya.
     - Sesuaikan koordinat `top` dan `left` widget `pw.Positioned` agar teks pas di kolom isian form asli.
@@ -25,4 +25,4 @@ Saat ini aplikasi menggunakan mode "Generated Layout" (re-kreasi) dengan placeho
 - `lib/models`: Definisi data (Kapal, Sanitasi, Kesehatan).
 - `lib/providers`: Logic penyimpanan data sementara.
 - `lib/screens`: Layar input step-by-step.
-- `lib/utils/pdf_generator.dart`: Logic pembuatan PDF.
+- `lib/utils/generator_form_2.dart`: Logic pembuatan PDF.
