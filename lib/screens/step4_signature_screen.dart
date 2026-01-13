@@ -223,64 +223,7 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     }
   }
 
-  Widget _buildStepIndicator(
-    int step,
-    String label,
-    bool isCompleted,
-    bool isCurrent,
-  ) {
-    Color bgColor = (isCompleted || isCurrent)
-        ? Colors.white
-        : Colors.white.withOpacity(0.3);
-    Color contentColor = Theme.of(context).primaryColor;
-    Color labelColor = (isCompleted || isCurrent)
-        ? Colors.white
-        : Colors.white.withOpacity(0.6);
 
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Center(
-              child: isCompleted
-                  ? Icon(Icons.check, color: contentColor, size: 16)
-                  : Text(
-                      '$step',
-                      style: TextStyle(
-                        color: contentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-            ),
-          ),
-          const Gap(4),
-          SizedBox(
-            height: 24,
-            child: Text(
-              label,
-              style: TextStyle(color: labelColor, fontSize: 10),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepLine(bool isCompleted) {
-    return Container(
-      width: 20,
-      height: 2,
-      color: isCompleted ? Colors.white : Colors.white.withOpacity(0.3),
-    );
-  }
 
   Widget _buildSignatureCard({
     required String title,

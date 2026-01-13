@@ -70,7 +70,7 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                           name: 'shipName',
                           label: 'Nama Kapal',
                           initialValue: provider.data.shipName,
-                          hintText: 'Contoh: MV. Sejahtera',
+                          hintText: 'Nama Kapal',
                           validator: FormBuilderValidators.required(),
                         ),
                         const Gap(16),
@@ -110,7 +110,7 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                                 name: 'grossTonnage',
                                 label: 'Besar Kapal (GT)', // Closest to 'Tipe Kapal' structure-wise
                                 initialValue: provider.data.grossTonnage,
-                                hintText: 'GT...',
+                                hintText: 'Besar Kapal (GT)',
                                 keyboardType: TextInputType.number,
                               ),
                             ),
@@ -123,7 +123,7 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                           name: 'imoNumber',
                           label: 'Nomor IMO',
                           initialValue: provider.data.imoNumber,
-                          hintText: '1234567',
+                          hintText: 'Nomor IMO',
                           keyboardType: TextInputType.number,
                         ),
                       ],
@@ -141,7 +141,7 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                           name: 'lastPort',
                           label: 'Pelabuhan Asal',
                           initialValue: provider.data.lastPort,
-                          hintText: 'Cari nama pelabuhan...',
+                          hintText: 'Pelabuhan Asal',
                           prefixIcon: Icons.anchor,
                          ),
                          const Gap(16),
@@ -159,7 +159,7 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                           name: 'nextPort',
                           label: 'Tujuan',
                           initialValue: provider.data.nextPort,
-                          hintText: 'Pelabuhan tujuan...',
+                          hintText: 'Tujuan',
                           prefixIcon: Icons.anchor,
                          ),
                          const Gap(16),
@@ -177,7 +177,7 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
                            name: 'dockLocation',
                            label: 'Lokasi Sandar',
                            initialValue: provider.data.dockLocation,
-                           hintText: 'Dermaga...',
+                           hintText: 'Dermaga',
                            prefixIcon: Icons.location_on,
                          ),
                       ],
@@ -529,65 +529,5 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
     );
   }
 
-  Widget _buildStepIndicator(
-    int step,
-    String label,
-    bool isCompleted,
-    bool isCurrent,
-  ) {
-    Color bgColor;
-    if (isCompleted || isCurrent) {
-      bgColor = Colors.white;
-    } else {
-      bgColor = Colors.white.withOpacity(0.3);
-    }
-    Color contentColor = Theme.of(context).primaryColor;
-    Color labelColor = (isCompleted || isCurrent)
-        ? Colors.white
-        : Colors.white.withOpacity(0.6);
 
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Center(
-              child: isCompleted
-                  ? Icon(Icons.check, color: contentColor, size: 16)
-                  : Text(
-                      '$step',
-                      style: TextStyle(
-                        color: contentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-            ),
-          ),
-          const Gap(4),
-          SizedBox(
-            height: 24,
-            child: Text(
-              label,
-              style: TextStyle(color: labelColor, fontSize: 10),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepLine(bool isCompleted) {
-    return Container(
-      width: 20,
-      height: 2,
-      color: isCompleted ? Colors.white : Colors.white.withOpacity(0.3),
-    );
-  }
 }

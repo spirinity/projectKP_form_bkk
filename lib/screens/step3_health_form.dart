@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import '../providers/inspection_provider.dart';
 import '../widgets/custom_progress_stepper.dart';
+import '../widgets/form_widgets.dart'; // Added import
 import 'step4_signature_screen.dart';
 
 class Step3HealthForm extends StatefulWidget {
@@ -280,15 +281,44 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
                             ),
                           ),
                           const Gap(12),
+                          
                           // ICV / Vaccination
-                          _buildDocumentRadio(
-                            title: 'ICV / Vaccination',
-                            name: 'icvStatus',
-                            initialValue: provider.data.icvStatus ?? 'Lengkap',
-                            options: ['Lengkap', 'Tidak Lengkap'],
-                          ),
+                          const Text('ICV / Vaccination', style: TextStyle(fontWeight: FontWeight.w600)),
                           const Gap(8),
-                          // ICV Text Input (Validation: Alphanumeric, Max 13)
+                          FormBuilderField<String>(
+                            name: 'icvStatus',
+                            initialValue: provider.data.icvStatus,
+                            builder: (field) {
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: SelectionCard(
+                                      label: 'Lengkap',
+                                      icon: Icons.check_circle_outline,
+                                      iconColor: Colors.green,
+                                      isSelected: field.value == 'Lengkap',
+                                      onTap: () => field.didChange('Lengkap'),
+                                      height: 80,
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: SelectionCard(
+                                      label: 'Tidak Lengkap',
+                                      icon: Icons.cancel_outlined,
+                                      iconColor: Colors.red,
+                                      isSelected: field.value == 'Tidak Lengkap',
+                                      onTap: () => field.didChange('Tidak Lengkap'),
+                                      height: 80,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          
+                          const Gap(12),
+                          // ICV Text Input
                           FormBuilderTextField(
                             name: 'icvCertificateCount',
                             initialValue: provider.data.icvCertificateCount,
@@ -300,24 +330,49 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
                               ),
                               filled: true,
                               fillColor: Colors.grey[50],
-                              counterText:
-                                  '', // Hide default character counter if preferred, or show it. Using maxLength usually shows it.
                             ),
                             maxLength: 13,
-                            validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.maxLength(13),
-                              // Custom validator for alphanumeric if strictly required, but usually alphanumeric includes symbols per user request "bisa huruf angka dan simbol" which is basically 'text'
-                              // So just Max Length 13 is the main constraint.
-                            ]),
+                             validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.maxLength(13),
+                             ]),
                           ),
+
                           const Gap(12),
+                          
                           // Sertifikat PPPK
-                          _buildDocumentRadio(
-                            title: 'Sertifikat PPPK',
-                            subtitle: 'First Aid Equipment Certificate',
+                           const Text('Sertifikat PPPK', style: TextStyle(fontWeight: FontWeight.w600)),
+                           const Text('First Aid Equipment Certificate', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                           const Gap(8),
+                          FormBuilderField<String>(
                             name: 'p3kStatus',
-                            initialValue: provider.data.p3kStatus ?? 'Tersedia',
-                            options: ['Tersedia', 'Tidak Tersedia'],
+                            initialValue: provider.data.p3kStatus,
+                            builder: (field) {
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: SelectionCard(
+                                      label: 'Tersedia',
+                                      icon: Icons.check_circle_outline,
+                                      iconColor: Colors.blue,
+                                      isSelected: field.value == 'Tersedia',
+                                      onTap: () => field.didChange('Tersedia'),
+                                      height: 80,
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Expanded(
+                                    child: SelectionCard(
+                                      label: 'Tidak Tersedia',
+                                      icon: Icons.cancel_outlined,
+                                      iconColor: Colors.red,
+                                      isSelected: field.value == 'Tidak Tersedia',
+                                      onTap: () => field.didChange('Tidak Tersedia'),
+                                      height: 80,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -395,64 +450,7 @@ class _Step3HealthFormState extends State<Step3HealthForm> {
     }
   }
 
-  Widget _buildStepIndicator(
-    int step,
-    String label,
-    bool isCompleted,
-    bool isCurrent,
-  ) {
-    Color bgColor = (isCompleted || isCurrent)
-        ? Colors.white
-        : Colors.white.withOpacity(0.3);
-    Color contentColor = Theme.of(context).primaryColor;
-    Color labelColor = (isCompleted || isCurrent)
-        ? Colors.white
-        : Colors.white.withOpacity(0.6);
 
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Center(
-              child: isCompleted
-                  ? Icon(Icons.check, color: contentColor, size: 16)
-                  : Text(
-                      '$step',
-                      style: TextStyle(
-                        color: contentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-            ),
-          ),
-          const Gap(4),
-          SizedBox(
-            height: 24,
-            child: Text(
-              label,
-              style: TextStyle(color: labelColor, fontSize: 10),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepLine(bool isCompleted) {
-    return Container(
-      width: 20,
-      height: 2,
-      color: isCompleted ? Colors.white : Colors.white.withOpacity(0.3),
-    );
-  }
 
   Widget _buildDisplayItem({
     required String label,

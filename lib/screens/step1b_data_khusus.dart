@@ -190,9 +190,14 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                 _buildMainToggle(
                                   name: 'mdh_exists',
-                                  value: provider.data.mdhStatus != 'Tidak Ada',
+                                  value: provider.data.mdhStatus == null ? null : provider.data.mdhStatus != 'Tidak Ada',
                                   onChanged: (val) {
-                                    final newStatus = val ? 'Sehat' : 'Tidak Ada';
+                                    String? newStatus;
+                                    if (val == false) {
+                                      newStatus = 'Tidak Ada';
+                                    } else if (val == true) {
+                                      newStatus = null; // Clear status if "Ada" is selected, user needs to pick "Sehat" or "Tidak Sehat"
+                                    }
                                     _formKey.currentState?.fields['mdhStatus']?.didChange(newStatus);
                                     setStateSection(() {}); // Local rebuild only
                                   },
@@ -203,9 +208,9 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                                 const Gap(8),
                                 FormBuilderField<String>(
                                   name: 'mdhStatus',
-                                  initialValue: provider.data.mdhStatus ?? 'Sehat',
+                                  initialValue: provider.data.mdhStatus,
                                   builder: (field) {
-                                    final isEnabled = _formKey.currentState?.fields['mdh_exists']?.value ?? true;
+                                    final isEnabled = _formKey.currentState?.fields['mdh_exists']?.value ?? (provider.data.mdhStatus != 'Tidak Ada');
                                     return Row(
                                       children: [
                                         Expanded(child: _buildStatusButton('Sehat', field, enabled: isEnabled)),
@@ -243,9 +248,9 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                 _buildMainToggle(
                                   name: 'sscec_exists', 
-                                  value: provider.data.sscecStatus != 'Tidak Ada',
+                                   value: provider.data.sscecStatus == null ? null : provider.data.sscecStatus != 'Tidak Ada',
                                   onChanged: (val) {
-                                     final newStatus = val ? 'Berlaku' : 'Tidak Ada';
+                                     final newStatus = val ? null : 'Tidak Ada';
                                     _formKey.currentState?.fields['sscecStatus']?.didChange(newStatus);
                                     setStateSection(() {});
                                   },
@@ -255,7 +260,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                                 // Status Buttons
                                  FormBuilderField<String>(
                                     name: 'sscecStatus',
-                                    initialValue: provider.data.sscecStatus ?? 'Berlaku',
+                                    initialValue: provider.data.sscecStatus,
                                     builder: (field) {
                                       final isEnabled = _formKey.currentState?.fields['sscec_exists']?.value ?? true;
                                       return Row(
@@ -309,7 +314,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                 _buildMainToggle(
                                   name: 'crewListStatus',
-                                  value: provider.data.crewListStatus == 'Ada',
+                                  value: provider.data.crewListStatus == null ? null : provider.data.crewListStatus == 'Ada',
                                   onChanged: (val) {
                                      _formKey.currentState?.fields['crewListStatus_real']?.didChange(val ? 'Ada' : 'Tidak Ada');
                                      setStateSection((){});
@@ -347,9 +352,9 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                  _buildMainToggle(
                                   name: 'icv_exists',
-                                  value: provider.data.icvStatus != 'Tidak Ada',
+                                  value: provider.data.icvStatus == null ? null : provider.data.icvStatus != 'Tidak Ada',
                                   onChanged: (val) {
-                                    final newStatus = val ? 'Sesuai' : 'Tidak Ada';
+                                    final newStatus = val ? null : 'Tidak Ada';
                                     _formKey.currentState?.fields['icvStatus']?.didChange(newStatus);
                                     setStateSection((){});
                                   },
@@ -359,7 +364,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                                 // Status Buttons
                                    FormBuilderField<String>(
                                     name: 'icvStatus',
-                                    initialValue: provider.data.icvStatus ?? 'Sesuai',
+                                    initialValue: provider.data.icvStatus,
                                     builder: (field) {
                                       final isEnabled = _formKey.currentState?.fields['icv_exists']?.value ?? true;
                                       return Row(
@@ -398,9 +403,9 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                 _buildMainToggle(
                                   name: 'p3k_exists', 
-                                  value: provider.data.p3kStatus != 'Tidak Ada',
+                                  value: provider.data.p3kStatus == null ? null : provider.data.p3kStatus != 'Tidak Ada',
                                   onChanged: (val) {
-                                     final newStatus = val ? 'Berlaku' : 'Tidak Ada';
+                                     final newStatus = val ? null : 'Tidak Ada';
                                     _formKey.currentState?.fields['p3kStatus']?.didChange(newStatus);
                                     setStateSection(() {});
                                   },
@@ -410,7 +415,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                                 // Status Buttons
                                    FormBuilderField<String>(
                                     name: 'p3kStatus',
-                                    initialValue: provider.data.p3kStatus ?? 'Berlaku',
+                                    initialValue: provider.data.p3kStatus,
                                     builder: (field) {
                                       final isEnabled = _formKey.currentState?.fields['p3k_exists']?.value ?? true;
                                       return Row(
@@ -464,9 +469,9 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                  _buildMainToggle(
                                   name: 'healthBook_exists',
-                                  value: provider.data.healthBookStatus != 'Tidak Ada',
+                                  value: provider.data.healthBookStatus == null ? null : provider.data.healthBookStatus != 'Tidak Ada',
                                   onChanged: (val) {
-                                    final newStatus = val ? 'Sesuai' : 'Tidak Ada';
+                                    final newStatus = val ? null : 'Tidak Ada';
                                     _formKey.currentState?.fields['healthBookStatus']?.didChange(newStatus);
                                     setStateSection((){});
                                   },
@@ -476,7 +481,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                                 // Status Buttons
                                    FormBuilderField<String>(
                                     name: 'healthBookStatus',
-                                    initialValue: provider.data.healthBookStatus ?? 'Sesuai',
+                                    initialValue: provider.data.healthBookStatus,
                                     builder: (field) {
                                       final isEnabled = _formKey.currentState?.fields['healthBook_exists']?.value ?? true;
                                       return Row(
@@ -524,13 +529,13 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                 _buildMainToggle(
                                   name: 'voyageMemoStatus_toggle',
-                                  value: provider.data.voyageMemoStatus == 'Ada',
+                                  value: provider.data.voyageMemoStatus == null ? null : provider.data.voyageMemoStatus == 'Ada',
                                   onChanged: (val) {
                                      _formKey.currentState?.fields['voyageMemoStatus']?.didChange(val ? 'Ada' : 'Tidak Ada');
                                      setStateSection((){});
                                   },
                                 ),
-                                Visibility(visible: false, child: FormBuilderTextField(name: 'voyageMemoStatus', initialValue: provider.data.voyageMemoStatus ?? 'Ada')),
+                                Visibility(visible: false, child: FormBuilderTextField(name: 'voyageMemoStatus', initialValue: provider.data.voyageMemoStatus)),
                                 const Gap(16),
                                 Builder(
                                   builder: (context) {
@@ -558,13 +563,13 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                 _buildMainToggle(
                                   name: 'shipParticularStatus_toggle',
-                                  value: provider.data.shipParticularStatus == 'Ada',
+                                  value: provider.data.shipParticularStatus == null ? null : provider.data.shipParticularStatus == 'Ada',
                                   onChanged: (val) {
                                      _formKey.currentState?.fields['shipParticularStatus']?.didChange(val ? 'Ada' : 'Tidak Ada');
                                      setStateSection((){});
                                   },
                                 ),
-                                Visibility(visible: false, child: FormBuilderTextField(name: 'shipParticularStatus', initialValue: provider.data.shipParticularStatus ?? 'Ada')),
+                                Visibility(visible: false, child: FormBuilderTextField(name: 'shipParticularStatus', initialValue: provider.data.shipParticularStatus)),
                                 const Gap(16),
                                 Builder(
                                   builder: (context) {
@@ -592,13 +597,13 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                               children: [
                                 _buildMainToggle(
                                   name: 'manifestCargoStatus_toggle',
-                                  value: provider.data.manifestCargoStatus == 'Ada',
+                                  value: provider.data.manifestCargoStatus == null ? null : provider.data.manifestCargoStatus == 'Ada',
                                   onChanged: (val) {
                                      _formKey.currentState?.fields['manifestCargoStatus']?.didChange(val ? 'Ada' : 'Tidak Ada');
                                      setStateSection((){});
                                   },
                                 ),
-                                 Visibility(visible: false, child: FormBuilderTextField(name: 'manifestCargoStatus', initialValue: provider.data.manifestCargoStatus ?? 'Ada')),
+                                 Visibility(visible: false, child: FormBuilderTextField(name: 'manifestCargoStatus', initialValue: provider.data.manifestCargoStatus)),
                                 const Gap(16),
                                 Builder(
                                   builder: (context) {
@@ -887,7 +892,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
 
   Widget _buildMainToggle({
     required String name,
-    required bool value, // acting as initialValue
+    bool? value, // acting as initialValue
     required ValueChanged<bool> onChanged,
   }) {
     return FormBuilderField<bool>(
@@ -903,11 +908,11 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
           child: LayoutBuilder(builder: (context, constraints) {
             return Row(
               children: [
-                _buildTogglePart('Ada', true, field.value ?? true, (val) {
+                _buildTogglePart('Ada', true, field.value, (val) {
                   field.didChange(val);
                   onChanged(val);
                 }),
-                _buildTogglePart('Tidak Ada', false, field.value ?? true, (val) {
+                _buildTogglePart('Tidak Ada', false, field.value, (val) {
                   field.didChange(val);
                   onChanged(val);
                 }),
@@ -919,8 +924,8 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
     );
   }
 
-  Widget _buildTogglePart(String label, bool isLeft, bool currentValue, ValueChanged<bool> onChanged) {
-    final bool isActive = isLeft ? currentValue : !currentValue;
+  Widget _buildTogglePart(String label, bool isLeft, bool? currentValue, ValueChanged<bool> onChanged) {
+    final bool isActive = currentValue == null ? false : (isLeft ? currentValue == true : currentValue == false);
     return Expanded(
       child: GestureDetector(
         onTap: () => onChanged(isLeft),
@@ -1093,25 +1098,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
     );
   }
   
-  Widget _buildStepIndicator(int step, String label, bool isCompleted, bool isCurrent) {
-    Color contentColor = Theme.of(context).primaryColor;
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 28, height: 28,
-            decoration: BoxDecoration(color: (isCompleted||isCurrent)?Colors.white:Colors.white.withOpacity(0.3), shape: BoxShape.circle),
-            child: Center(child: Text('$step', style: TextStyle(color: contentColor, fontWeight: FontWeight.bold, fontSize: 12))),
-          ),
-          const Gap(4),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 10), maxLines: 1),
-        ],
-      ),
-    );
-  }
-  Widget _buildStepLine(bool isCompleted) {
-    return Container(width: 20, height: 2, color: isCompleted?Colors.white:Colors.white.withOpacity(0.3));
-  }
+
 
   void _submitForm() {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
