@@ -13,7 +13,7 @@ class PdfGenerator {
 
     // Load template overlay image
     final Uint8List overlayBytes = (await rootBundle.load(
-      'lib/pdf/sanitasi.png',
+      'lib/pdf/form_2.png',
     )).buffer.asUint8List();
     final overlayImage = pw.MemoryImage(overlayBytes);
 
@@ -31,9 +31,9 @@ class PdfGenerator {
     // Kolom checkbox TIDAK memiliki lebar yang sama!
     // Kolom 1 & 2 (Kondisi Sanitasi) lebih sempit
     // Kolom 3 & 4 (Vektor) lebih lebar
-    const double col1X = 289; // Memenuhi Syarat (kolom sempit)
-    const double col2X = 362; // Tidak Memenuhi Syarat (kolom medium)
-    const double col3X = 442; // Tampak Tanda-tanda (kolom medium-lebar)
+    const double col1X = 285; // Memenuhi Syarat (kolom sempit)
+    const double col2X = 368; // Tidak Memenuhi Syarat (kolom medium)
+    const double col3X = 454; // Tampak Tanda-tanda (kolom medium-lebar)
     const double col4X = 510; // Tidak Tampak (kolom paling lebar)
 
     // Posisi Y untuk setiap baris (dari atas)
@@ -95,7 +95,7 @@ class PdfGenerator {
     // Signature akan otomatis di-center dalam kotak ini
 
     // Area tanda tangan Nahkoda (kiri)
-    const double captainBoxX = 92; // X awal kotak
+    const double captainBoxX = 76; // X awal kotak
     const double captainBoxY = 604; // Y awal kotak
     const double captainBoxWidth = 150; // Lebar kotak (sesuai panjang garis)
     const double captainBoxHeight = 30; // Tinggi kotak

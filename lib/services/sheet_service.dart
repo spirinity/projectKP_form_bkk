@@ -4,7 +4,7 @@ import '../models/inspection_model.dart';
 
 class SheetService {
   // Ganti URL ini dengan URL Web App Anda setelah deploy
-  static const String _webAppUrl = 'https://script.google.com/macros/s/AKfycbwi1d0nlUU7DEPKKlU1CrvesrHpY_Z3YkvrXDp9iIe4BGefvloA--cuEiRcp0SQ89eqZQ/exec';
+  static const String _webAppUrl = '';
 
   static Future<bool> submitInspection(InspectionModel data) async {
     try {
