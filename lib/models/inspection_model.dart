@@ -177,13 +177,13 @@ class InspectionModel {
   String? manifestCargoNote;
 
   // C. Faktor Risiko PHEIC
-  bool sanitationRisk;
+  bool? sanitationRisk;
   String? sanitationRiskDetail;
-  bool healthRisk;
+  bool? healthRisk;
   String? healthRiskDetail;
 
   // --- III. KESIMPULAN ---
-  bool isPHEICFree; // Kapal Bebas PHEIC vs Tidak Bebas
+  bool? isPHEICFree; // Kapal Bebas PHEIC vs Tidak Bebas
 
   // --- IV. REKOMENDASI ---
   // A. Kapal dalam Karantina
@@ -192,7 +192,7 @@ class InspectionModel {
 
   // B. Kapal dalam Negeri
   String? sibNumber; // Jika ada
-  bool sibGiven; // Diberikan / Tidak
+  bool? sibGiven; // Diberikan / Tidak
   DateTime? sibDate;
 
   // --- SANITASI KAPAL (16 Area Pemeriksaan) ---
@@ -273,15 +273,15 @@ class InspectionModel {
     this.shipParticularNote,
     this.manifestCargoStatus,
     this.manifestCargoNote,
-    this.sanitationRisk = false,
+    this.sanitationRisk,
     this.sanitationRiskDetail,
-    this.healthRisk = false,
+    this.healthRisk,
     this.healthRiskDetail,
-    this.isPHEICFree = true,
+    this.isPHEICFree,
     this.quarantineRecommendation,
     this.quarantineRecommendationDate,
     this.sibNumber,
-    this.sibGiven = false,
+    this.sibGiven,
     this.sibDate,
     Map<String, SanitationAreaData>? sanitationAreas,
     this.sanitationNote,
