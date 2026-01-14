@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -9,12 +10,23 @@ import '../models/inspection_model.dart';
 /// lalu data (tanda centang ✓) diposisikan secara absolut di atasnya.
 class PdfGenerator {
   static Future<Uint8List> generatePdf(InspectionModel data) async {
-    final pdf = pw.Document();
-
-    // Load template overlay image
+    // 1. Load template overlay image on Main Thread
     final Uint8List overlayBytes = (await rootBundle.load(
       'lib/pdf/form_2.png',
     )).buffer.asUint8List();
+
+    // 2. Run PDF generation in a background isolate
+    return await compute(_generatePdfTask, {
+      'data': data,
+      'overlayBytes': overlayBytes,
+    });
+  }
+
+  static Future<Uint8List> _generatePdfTask(Map<String, dynamic> params) async {
+    final InspectionModel data = params['data'] as InspectionModel;
+    final Uint8List overlayBytes = params['overlayBytes'] as Uint8List;
+
+    final pdf = pw.Document();
     final overlayImage = pw.MemoryImage(overlayBytes);
 
     // --- KOORDINAT CHECKBOX ---

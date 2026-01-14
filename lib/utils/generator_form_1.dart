@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -39,12 +40,24 @@ class PdfGeneratorForm1 {
   static const double pageHeight = 842.0;
   
   static Future<Uint8List> generatePdf(InspectionModel data) async {
-    final pdf = pw.Document();
-
-    // Load template overlay image
+    // 1. Load template overlay image on Main Thread (AssetBundle is not available in Isolate)
     final Uint8List overlayBytes = (await rootBundle.load(
       'lib/pdf/form_1.png',
     )).buffer.asUint8List();
+
+    // 2. Run PDF generation in a background isolate to avoid blocking the UI
+    return await compute(_generatePdfTask, {
+      'data': data,
+      'overlayBytes': overlayBytes,
+    });
+  }
+
+  /// Internal task to run in isolate
+  static Future<Uint8List> _generatePdfTask(Map<String, dynamic> params) async {
+    final InspectionModel data = params['data'] as InspectionModel;
+    final Uint8List overlayBytes = params['overlayBytes'] as Uint8List;
+
+    final pdf = pw.Document();
     final overlayImage = pw.MemoryImage(overlayBytes);
 
     // Date formatter
