@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../providers/inspection_provider.dart';
-import '../utils/generator_form_1.dart';
-import '../utils/generator_form_2.dart';
-import 'home_screen.dart'; // To go back home
+import '../utils/generator_combined.dart';
+import 'home_screen.dart';
 
+/// Preview Screen dengan caching untuk meringankan beban memory di HP low-end.
+/// PDF gabungan (Form 1 + Form 2) di-generate sekali dan di-cache.
 class PreviewScreen extends StatefulWidget {
   const PreviewScreen({super.key});
 
@@ -15,29 +16,58 @@ class PreviewScreen extends StatefulWidget {
   State<PreviewScreen> createState() => _PreviewScreenState();
 }
 
-class _PreviewScreenState extends State<PreviewScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _PreviewScreenState extends State<PreviewScreen> {
+  // Cache untuk PDF bytes - hanya generate sekali
+  Uint8List? _cachedPdfBytes;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _generatePdf();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Future<void> _generatePdf() async {
+    try {
+      final provider = Provider.of<InspectionProvider>(context, listen: false);
+      final pdfBytes = await CombinedPdfGenerator.generateCombinedPdf(provider.data);
+      
+      if (mounted) {
+        setState(() {
+          _cachedPdfBytes = pdfBytes;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Gagal membuat PDF: $e';
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<InspectionProvider>(context, listen: false);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Preview Dokumen'),
         actions: [
+          // Tombol refresh untuk regenerate PDF
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh PDF',
+            onPressed: () {
+              setState(() {
+                _isLoading = true;
+                _cachedPdfBytes = null;
+                _errorMessage = null;
+              });
+              _generatePdf();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.home),
             onPressed: () {
@@ -49,62 +79,63 @@ class _PreviewScreenState extends State<PreviewScreen> with SingleTickerProvider
             },
           )
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Form 1 - Data Kapal'),
-            Tab(text: 'Form 2 - Sanitasi'),
-          ],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Form 1 Preview
-          KeepAliveWrapper(
-            child: PdfPreview(
-              build: (format) async {
-                return await PdfGeneratorForm1.generatePdf(provider.data);
-              },
-              pageFormats: const {'A4': PdfPageFormat.a4},
-              canDebug: false,
-              canChangeOrientation: false,
-              canChangePageFormat: false,
-            ),
-          ),
-          // Form 2 Preview
-          KeepAliveWrapper(
-            child: PdfPreview(
-              build: (format) async {
-                return await PdfGenerator.generatePdf(provider.data);
-              },
-              pageFormats: const {'A4': PdfPageFormat.a4},
-              canDebug: false,
-              canChangeOrientation: false,
-              canChangePageFormat: false,
-            ),
-          ),
-        ],
-      ),
+      body: _buildBody(),
     );
   }
-}
 
-class KeepAliveWrapper extends StatefulWidget {
-  final Widget child;
-  const KeepAliveWrapper({super.key, required this.child});
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Membuat PDF...'),
+            SizedBox(height: 8),
+            Text(
+              'Form 1 + Form 2',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
 
-  @override
-  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
-}
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(_errorMessage!, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _isLoading = true;
+                  _errorMessage = null;
+                });
+                _generatePdf();
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Coba Lagi'),
+            ),
+          ],
+        ),
+      );
+    }
 
-class _KeepAliveWrapperState extends State<KeepAliveWrapper> with AutomaticKeepAliveClientMixin {
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return widget.child;
+    // Gunakan cached PDF bytes - tidak generate ulang
+    return PdfPreview(
+      build: (format) async => _cachedPdfBytes!,
+      pageFormats: const {'A4': PdfPageFormat.a4},
+      canDebug: false,
+      canChangeOrientation: false,
+      canChangePageFormat: false,
+      pdfFileName: 'inspeksi_kapal.pdf',
+    );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
