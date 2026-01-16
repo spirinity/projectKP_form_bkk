@@ -144,7 +144,7 @@ class InspectionModel {
   String? sscecNote;
 
   // Crew List
-  String? crewListStatus; // Ada / Tidak Ada
+  String? crewListStatus = 'Ada'; // Ada / Tidak Ada - default: Ada
   String? crewListNote;
 
   // Buku Kuning (ICV)

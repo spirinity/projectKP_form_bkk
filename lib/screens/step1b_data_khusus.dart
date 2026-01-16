@@ -312,23 +312,26 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildMainToggle(
+                                FormBuilderField<String>(
                                   name: 'crewListStatus',
-                                  value: provider.data.crewListStatus == null ? null : provider.data.crewListStatus == 'Ada',
-                                  onChanged: (val) {
-                                     _formKey.currentState?.fields['crewListStatus_real']?.didChange(val ? 'Ada' : 'Tidak Ada');
-                                     setStateSection((){});
+                                  initialValue: provider.data.crewListStatus ?? 'Ada',
+                                  builder: (field) {
+                                    return _buildMainToggle(
+                                      name: 'crewListStatus_toggle',
+                                      value: field.value == null ? null : field.value == 'Ada',
+                                      onChanged: (val) {
+                                        field.didChange(val ? 'Ada' : 'Tidak Ada');
+                                        setStateSection((){});
+                                      },
+                                    );
                                   },
-                                ),
-                                Visibility(
-                                  visible: false,
-                                  child: FormBuilderTextField(name: 'crewListStatus_real', initialValue: provider.data.crewListStatus ?? 'Ada'),
                                 ),
 
                                 const Gap(16),
                                 Builder(
                                   builder: (context) {
-                                    final exists = _formKey.currentState?.fields['crewListStatus']?.value ?? (provider.data.crewListStatus == 'Ada');
+                                    final status = _formKey.currentState?.fields['crewListStatus']?.value ?? provider.data.crewListStatus ?? 'Ada';
+                                    final exists = status == 'Ada';
                                     return _buildNoteField('crewListNote', provider.data.crewListNote, enabled: !exists);
                                   }
                                 ),
@@ -1111,7 +1114,7 @@ class _Step1BDataKhususState extends State<Step1BDataKhusus> {
           status: values['sscecStatus'], note: values['sscecNote'], 
           place: values['sscecPlace'], date: values['sscecDate'], expiry: values['sscecExpiry']
        );
-       provider.updateDocumentCrewList(status: values['crewListStatus_real'], note: values['crewListNote']);
+       provider.updateDocumentCrewList(status: values['crewListStatus'], note: values['crewListNote']);
        provider.updateDocumentICV(status: values['icvStatus'], note: values['icvNote']);
        provider.updateDocumentP3K(
           status: values['p3kStatus'], note: values['p3kNote'],
