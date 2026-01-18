@@ -14,17 +14,11 @@ class PdfGeneratorForm4 {
     final Uint8List overlayBytes = (await rootBundle.load(
       'lib/pdf/form_4.png',
     )).buffer.asUint8List();
-    
-    // 2. Load font Calibri upon generation
-    final Uint8List fontBytes = (await rootBundle.load(
-      'lib/fonts/calibri.ttf',
-    )).buffer.asUint8List();
 
-    // 3. Run PDF generation in a background isolate
+    // 2. Run PDF generation in a background isolate
     return await compute(_generatePdfTask, {
       'data': data,
       'overlayBytes': overlayBytes,
-      'fontBytes': fontBytes,
     });
   }
 
@@ -35,12 +29,24 @@ class PdfGeneratorForm4 {
 
     final InspectionModel data = params['data'] as InspectionModel;
     final Uint8List overlayBytes = params['overlayBytes'] as Uint8List;
-    final Uint8List fontBytes = params['fontBytes'] as Uint8List; // Get font bytes
-    
-    final ttf = pw.Font.ttf(fontBytes.buffer.asByteData()); // Load font
+
     final pdf = pw.Document();
-    final overlayImage = pw.MemoryImage(overlayBytes);
     
+    await addPageToDocument(pdf, data, overlayBytes, null);
+
+    return pdf.save();
+  }
+
+  /// Menambahkan halaman Form 4 ke dokumen PDF yang sudah ada
+  static Future<void> addPageToDocument(
+    pw.Document pdf, 
+    InspectionModel data, 
+    Uint8List overlayBytes,
+    pw.Font? _ignoredFont,
+  ) async {
+    // FORCE Times New Roman as requested by user
+    final ttf = pw.Font.times();
+    final overlayImage = pw.MemoryImage(overlayBytes);
     // Format tanggal Indonesia: 14 Mei 2025
     final dateFormat = DateFormat('d MMMM yyyy', 'id_ID');
 
@@ -53,21 +59,6 @@ class PdfGeneratorForm4 {
     if (showLayoutGrid) {
       overlays.addAll(_buildGrid());
     }
-    
-    // Helper local to use ttf
-    pw.Widget _buildText(double x, double y, String text, {double fontSize = 9}) {
-      return pw.Positioned(
-        left: x,
-        top: y,
-        child: pw.Text(
-          text,
-          style: pw.TextStyle(
-            fontSize: fontSize,
-            font: ttf, // Use Calibri
-          ),
-        ),
-      );
-    }
 
     // ============================================================
     // KOORDINAT BERDASARKAN GAMBAR CONTOH (Estimasi Grid)
@@ -77,28 +68,28 @@ class PdfGeneratorForm4 {
     // Nama Petugas
     const double petugasX = 210;
     if (data.officerName != null) {
-      overlays.add(_buildText(petugasX, 184, data.officerName!)); 
+      overlays.add(_buildText(petugasX, 184, data.officerName!, ttf: ttf)); 
     }
     // NIP Petugas (Placeholder / Hardcoded for now as it's not in model)
-    overlays.add(_buildText(petugasX, 209, "198XXXXX...")); 
+    overlays.add(_buildText(petugasX, 209, "198XXXXX...", ttf: ttf)); 
 
     // --- 2. DATA KAPAL (MENYATAKAN BAHWA) ---
     const double shipDataX = 210;
     // Nama Kapal (Y ~ 205)
     if (data.shipName != null) {
-      overlays.add(_buildText(shipDataX, 273, data.shipName!)); 
+      overlays.add(_buildText(shipDataX, 273, data.shipName!, ttf: ttf)); 
     }
     // Bendera (Y ~ 218)
     if (data.flag != null) {
-      overlays.add(_buildText(shipDataX, 298, data.flag!));
+      overlays.add(_buildText(shipDataX, 298, data.flag!, ttf: ttf));
     }
     // Pelabuhan Asal (Y ~ 231)
     if (data.lastPort != null) {
-      overlays.add(_buildText(shipDataX, 323, data.lastPort!));
+      overlays.add(_buildText(shipDataX, 323, data.lastPort!, ttf: ttf));
     }
     // Pelabuhan Tujuan (Y ~ 244)
     if (data.nextPort != null) {
-      overlays.add(_buildText(shipDataX, 348, data.nextPort!));
+      overlays.add(_buildText(shipDataX, 348, data.nextPort!, ttf: ttf));
     }
 
     // --- 3. JUMLAH ABK (Crew) ---
@@ -107,15 +98,15 @@ class PdfGeneratorForm4 {
     
     // Total ABK
     if (data.crewCount != null) {
-      overlays.add(_buildText(crewDataX, crewY, data.crewCount.toString()));
+      overlays.add(_buildText(crewDataX, crewY, data.crewCount.toString(), ttf: ttf));
     }
     // Sehat
     if (data.crewHealthyCount != null) {
-      overlays.add(_buildText(crewDataX, crewY + 26, data.crewHealthyCount.toString()));
+      overlays.add(_buildText(crewDataX, crewY + 26, data.crewHealthyCount.toString(), ttf: ttf));
     }
     // Sakit
     if (data.crewSickCount != null) {
-      overlays.add(_buildText(crewDataX, crewY + 39, data.crewSickCount.toString()));
+      overlays.add(_buildText(crewDataX, crewY + 39, data.crewSickCount.toString(), ttf: ttf));
     }
 
     // --- 4. DOKUMEN KESEHATAN (IcV & P3K) ---
@@ -131,7 +122,7 @@ class PdfGeneratorForm4 {
     }
     // Sertifikat Count
     if (data.icvCertificateCount != null) {
-      overlays.add(_buildText(420, 464, data.icvCertificateCount!));
+      overlays.add(_buildText(420, 464, data.icvCertificateCount!, ttf: ttf));
     }
 
     // Sertifikat P3K
@@ -150,15 +141,15 @@ class PdfGeneratorForm4 {
 
     // Total Passenger
     if (data.passengerCount != null) {
-      overlays.add(_buildText(passDataX, passY, data.passengerCount.toString()));
+      overlays.add(_buildText(passDataX, passY, data.passengerCount.toString(), ttf: ttf));
     }
     // Sehat
     if (data.passengerHealthyCount != null) {
-      overlays.add(_buildText(passDataX, passY + 26, data.passengerHealthyCount.toString()));
+      overlays.add(_buildText(passDataX, passY + 26, data.passengerHealthyCount.toString(), ttf: ttf));
     }
     // Sakit
     if (data.passengerSickCount != null) {
-      overlays.add(_buildText(passDataX, passY + 40, data.passengerSickCount.toString()));
+      overlays.add(_buildText(passDataX, passY + 40, data.passengerSickCount.toString(), ttf: ttf));
     }
 
     // --- 6. TANDA TANGAN ---
@@ -167,7 +158,7 @@ class PdfGeneratorForm4 {
     
     // City & Date
     if (data.arrivalDate != null) {
-      overlays.add(_buildText(87, dateY, "Balikpapan, ${dateFormat.format(data.arrivalDate!)}"));
+      overlays.add(_buildText(87, dateY, "Balikpapan, ${dateFormat.format(data.arrivalDate!)}", ttf: ttf));
     }
 
     const double masterX = 100;
@@ -187,7 +178,7 @@ class PdfGeneratorForm4 {
       ));
     }
     if (data.captainName != null) {
-      overlays.add(_buildText(masterX, signatureY + 50, data.captainName!));
+      overlays.add(_buildText(masterX, signatureY + 50, data.captainName!, ttf: ttf));
     }
 
     // Officer
@@ -213,8 +204,8 @@ class PdfGeneratorForm4 {
           child: pw.Text(
             data.officerName!,
             style: pw.TextStyle(
-              fontSize: 9,
-              font: ttf,
+              fontSize: 10.5,
+              font: ttf ?? pw.Font.times(),
             ),
             textAlign: pw.TextAlign.center,
           ),
@@ -239,16 +230,24 @@ class PdfGeneratorForm4 {
         },
       ),
     );
-
-    return pdf.save();
   }
 
   // --- HELPER WIDGETS ---
   
-  // NOTE: _buildText moved inside _generatePdfTask to capture ttf closure, or we can update signature.
-  // To keep it clean, I moved it inside.
-  // The static helper below is deprecated or remove it.
-  
+  static pw.Widget _buildText(double x, double y, String text, {double fontSize = 10.5, pw.Font? ttf}) {
+    return pw.Positioned(
+      left: x,
+      top: y,
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontSize: fontSize,
+          font: ttf ?? pw.Font.times(),
+        ),
+      ),
+    );
+  }
+
   static pw.Widget _buildStrikethrough(double x, double y, double width) {
     return pw.Positioned(
       left: x,
@@ -320,5 +319,4 @@ class PdfGeneratorForm4 {
     }
     return grid;
   }
-
 }

@@ -246,7 +246,7 @@ class _Form1Coords {
   );
   
   // II.C. FAKTOR RISIKO PHEIC
-  static const double risikoY = 553;
+  static const double risikoY = 551;
   static const double risikoAdaX = 242;
   static const double risikoTidakAdaX = 446;
   
@@ -256,14 +256,14 @@ class _Form1Coords {
   static const double kesimpulanTidakBebasX = 260;
   
   // IV. REKOMENDASI A
-  static const double rekA_Y = 477;
-  static const double rekA_X = 115;
+  static const double rekA_Y = 600;
+  static const double rekA_X = 85;
   static const double rekA_TanggalX = 415;
   static const double rekA_JamX = 475;
   
   // IV. REKOMENDASI B
-  static const double rekB_Y = 518;
-  static const double rekB_X = 115;
+  static const double rekB_Y = 640;
+  static const double rekB_X = 85;
   static const double rekB_NoX = 250;
   static const double rekB_TanggalX = 350;
   static const double rekB_JamX = 440;
