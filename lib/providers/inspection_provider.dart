@@ -1,6 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../models/inspection_model.dart';
-import 'dart:typed_data';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class InspectionProvider with ChangeNotifier {
   InspectionModel _data = InspectionModel(
@@ -9,6 +11,50 @@ class InspectionProvider with ChangeNotifier {
   );
 
   InspectionModel get data => _data;
+
+  InspectionProvider() {
+    loadData();
+  }
+
+  // --- PERSISTENCE ---
+  
+  Future<void> saveData() async {
+    // DISABLED AUTO-SAVE: Data hanya disimpan ketika Submit di Step 4
+    // final prefs = await SharedPreferences.getInstance();
+    // final String jsonData = jsonEncode(_data.toMap());
+    // await prefs.setString('inspection_data', jsonData);
+  }
+
+  Future<void> loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? jsonData = prefs.getString('inspection_data');
+    if (jsonData != null) {
+      try {
+        final Map<String, dynamic> map = jsonDecode(jsonData);
+        _data = InspectionModel.fromMap(map);
+        notifyListeners();
+      } catch (e) {
+        debugPrint('Error loading data: $e');
+      }
+    }
+  }
+
+  Future<void> clearData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('inspection_data');
+    // Reset to default
+    _data = InspectionModel(
+      arrivalDate: DateTime.now(),
+      quarantineRecommendationDate: DateTime.now(),
+    );
+    notifyListeners();
+  }
+
+  // Restore Data Full
+  void setInspectionData(InspectionModel newData) {
+    _data = newData;
+    notifyListeners();
+  }
 
   // Generic update for "Data Umum"
   void updateGeneralData({
@@ -26,6 +72,8 @@ class InspectionProvider with ChangeNotifier {
     int? passengerCount,
     int? unregisteredPassengers,
     String? agency,
+    String? officerName,
+    String? officerNIP,
   }) {
     if (shipName != null) _data.shipName = shipName;
     if (flag != null) _data.flag = flag;
@@ -42,6 +90,10 @@ class InspectionProvider with ChangeNotifier {
     if (unregisteredPassengers != null)
       _data.unregisteredPassengers = unregisteredPassengers;
     if (agency != null) _data.agency = agency;
+    if (officerName != null) _data.officerName = officerName;
+    if (officerNIP != null) _data.officerNIP = officerNIP;
+    if (officerNIP != null) _data.officerNIP = officerNIP;
+    saveData();
     notifyListeners();
   }
 
@@ -52,12 +104,14 @@ class InspectionProvider with ChangeNotifier {
   void updateQuarantineViolations({String? signal, String? activity}) {
     if (signal != null) _data.quarantineSignal = signal;
     if (activity != null) _data.shipActivity = activity;
+    saveData();
     notifyListeners();
   }
 
   void updateDocumentMDH({String? status, String? note}) {
     if (status != null) _data.mdhStatus = status;
     if (note != null) _data.mdhNote = note;
+    saveData();
     notifyListeners();
   }
 
@@ -73,18 +127,21 @@ class InspectionProvider with ChangeNotifier {
     if (expiry != null) _data.sscecExpiry = expiry;
     if (status != null) _data.sscecStatus = status;
     if (note != null) _data.sscecNote = note;
+    saveData();
     notifyListeners();
   }
 
   void updateDocumentCrewList({String? status, String? note}) {
     _data.crewListStatus = status ?? _data.crewListStatus;
     _data.crewListNote = note ?? _data.crewListNote;
+    saveData();
     notifyListeners();
   }
 
   void updateDocumentICV({String? status, String? note}) {
     _data.icvStatus = status ?? _data.icvStatus;
     _data.icvNote = note ?? _data.icvNote;
+    saveData();
     notifyListeners();
   }
 
@@ -100,6 +157,7 @@ class InspectionProvider with ChangeNotifier {
     if (expiry != null) _data.p3kExpiry = expiry;
     if (status != null) _data.p3kStatus = status;
     if (note != null) _data.p3kNote = note;
+    saveData();
     notifyListeners();
   }
 
@@ -113,6 +171,7 @@ class InspectionProvider with ChangeNotifier {
     if (date != null) _data.healthBookDate = date;
     if (status != null) _data.healthBookStatus = status;
     if (note != null) _data.healthBookNote = note;
+    saveData();
     notifyListeners();
   }
 
@@ -130,6 +189,7 @@ class InspectionProvider with ChangeNotifier {
     if (shipPartNote != null) _data.shipParticularNote = shipPartNote;
     if (manifestStatus != null) _data.manifestCargoStatus = manifestStatus;
     if (manifestNote != null) _data.manifestCargoNote = manifestNote;
+    saveData();
     notifyListeners();
   }
 
@@ -143,11 +203,13 @@ class InspectionProvider with ChangeNotifier {
     if (sDetail != null) _data.sanitationRiskDetail = sDetail;
     if (health != null) _data.healthRisk = health;
     if (hDetail != null) _data.healthRiskDetail = hDetail;
+    saveData();
     notifyListeners();
   }
 
   void updateConclusion({bool? isPHEICFree}) {
     if (isPHEICFree != null) _data.isPHEICFree = isPHEICFree;
+    saveData();
     notifyListeners();
   }
 
@@ -163,6 +225,7 @@ class InspectionProvider with ChangeNotifier {
     if (sibNum != null) _data.sibNumber = sibNum;
     if (sibGiven != null) _data.sibGiven = sibGiven;
     if (sibDate != null) _data.sibDate = sibDate;
+    saveData();
     notifyListeners();
   }
 
@@ -183,6 +246,7 @@ class InspectionProvider with ChangeNotifier {
         wasteManagementGood ?? _data.wasteManagementGood;
     _data.vectorControlGood = vectorControlGood ?? _data.vectorControlGood;
     _data.sanitationNote = note ?? _data.sanitationNote;
+    saveData();
     notifyListeners();
   }
 
@@ -203,17 +267,20 @@ class InspectionProvider with ChangeNotifier {
         visibleSigns: visibleSigns,
         noSigns: noSigns,
       );
+      saveData();
       notifyListeners();
     }
   }
 
   void updateSanitationNote(String? note) {
     _data.sanitationNote = note;
+    saveData();
     notifyListeners();
   }
 
   void updateOtherAreaDescription(String? description) {
     _data.otherAreaDescription = description;
+    saveData();
     notifyListeners();
   }
 
@@ -240,6 +307,7 @@ class InspectionProvider with ChangeNotifier {
       _data.icvCertificateCount = icvCertificateCount;
     if (icvStatus != null) _data.icvStatus = icvStatus;
     if (p3kStatus != null) _data.p3kStatus = p3kStatus;
+    saveData();
     notifyListeners();
   }
 
@@ -255,21 +323,25 @@ class InspectionProvider with ChangeNotifier {
 
     _data.sickCount = sickCount ?? _data.sickCount;
     _data.symptoms = symptoms ?? _data.symptoms;
+    saveData();
     notifyListeners();
   }
 
   void setCaptainSignature(Uint8List? signature) {
     _data.captainSignature = signature;
+    saveData();
     notifyListeners();
   }
 
   void setOfficerSignature(Uint8List? signature) {
     _data.officerSignature = signature;
+    saveData();
     notifyListeners();
   }
 
   void setOfficerName(String name) {
     _data.officerName = name;
+    saveData();
     notifyListeners();
   }
 }
