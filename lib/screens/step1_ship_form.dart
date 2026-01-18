@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/inspection_provider.dart';
 import '../widgets/custom_progress_stepper.dart';
 import 'step1b_data_khusus.dart';
+import '../services/storage_service.dart';
 
 class Step1ShipForm extends StatefulWidget {
   const Step1ShipForm({super.key});
@@ -185,6 +186,34 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
 
                     const Gap(16),
 
+                    // --- DATA PETUGAS ---
+                    _buildFormCard(
+                      title: 'Data Petugas',
+                      icon: Icons.badge,
+                      children: [
+                        _buildStyledTextField(
+                          name: 'officerName',
+                          label: 'Nama Petugas',
+                          initialValue: provider.data.officerName,
+                          hintText: 'Nama Lengkap Petugas',
+                          prefixIcon: Icons.person,
+                          validator: FormBuilderValidators.required(),
+                        ),
+                        const Gap(16),
+                        _buildStyledTextField(
+                          name: 'officerNIP',
+                          label: 'NIP',
+                          initialValue: provider.data.officerNIP,
+                          hintText: 'Nomor Induk Pegawai',
+                          prefixIcon: Icons.badge_outlined,
+                          keyboardType: TextInputType.number,
+                          validator: FormBuilderValidators.required(),
+                        ),
+                      ],
+                    ),
+                    
+                    const Gap(16),
+
                     // --- PERSONEL & KEAGENAN ---
                     _buildFormCard(
                       title: 'Personel & Keagenan',
@@ -269,7 +298,7 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
     );
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
       final provider = Provider.of<InspectionProvider>(context, listen: false);
@@ -292,7 +321,13 @@ class _Step1ShipFormState extends State<Step1ShipForm> {
         passengerCount: parseInt(values['passengerCount']),
         unregisteredPassengers: parseInt(values['unregisteredPassengers']),
         agency: values['agency'],
+        officerName: values['officerName'],
+        officerNIP: values['officerNIP'],
       );
+
+      // SIMPAN DATA KE LOCAL STORAGE DIHAPUS (Hanya di Step 4)
+      
+      if (!mounted) return;
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const Step1BDataKhusus()),

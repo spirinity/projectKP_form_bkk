@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:signature/signature.dart';
 import '../providers/inspection_provider.dart';
 import 'preview_screen.dart';
+import '../services/storage_service.dart';
+
 import '../services/sheet_service.dart';
 import '../widgets/custom_progress_stepper.dart';
 
@@ -27,19 +29,20 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     exportBackgroundColor: Colors.white,
   );
 
-  final TextEditingController _officerNameController = TextEditingController();
+
 
   @override
   void dispose() {
     _captainController.dispose();
     _officerController.dispose();
-    _officerNameController.dispose();
+    _officerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final provider = Provider.of<InspectionProvider>(context);
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -83,16 +86,28 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
                     icon: Icons.badge,
                     iconColor: Colors.teal,
                     children: [
-                      TextField(
-                        controller: _officerNameController,
-                        decoration: InputDecoration(
-                          labelText: 'Nama Petugas',
-                          prefixIcon: const Icon(Icons.person_pin, size: 20),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Nama Petugas", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                            const Gap(4),
+                            Text(
+                              provider.data.officerName ?? "Belum Diisi",
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            if (provider.data.officerNIP != null) ...[
+                               const Gap(4),
+                               Text("NIP: ${provider.data.officerNIP}", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                            ]
+                          ],
                         ),
                       ),
                       const Gap(16),
@@ -161,8 +176,7 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
 
   Future<void> _submitForm() async {
     if (_captainController.isEmpty ||
-        _officerController.isEmpty ||
-        _officerNameController.text.isEmpty) {
+        _officerController.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
@@ -187,7 +201,7 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
     if (captainBytes != null && officerBytes != null) {
       provider.setCaptainSignature(captainBytes);
       provider.setOfficerSignature(officerBytes);
-      provider.setOfficerName(_officerNameController.text);
+      // Nama petugas sudah di-set di Step 1
 
       if (context.mounted) {
         // 1. Show Loading Dialog
@@ -199,6 +213,9 @@ class _Step4SignatureScreenState extends State<Step4SignatureScreen> {
 
         // 2. Submit to Google Sheets
         bool isSuccess = await SheetService.submitInspection(provider.data);
+
+        // 3. Save FULL DATA to Local Storage
+        await StorageService.saveReport(provider.data.toMap());
         
         if (context.mounted) {
           Navigator.pop(context); // Close loading
