@@ -1,3 +1,4 @@
+
 name: health_quarantine_app
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
@@ -46,6 +47,7 @@ dependencies:
   gap: ^3.0.1
   google_fonts: ^6.3.2
   http: ^1.6.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
